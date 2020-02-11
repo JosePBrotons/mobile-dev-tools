@@ -12,11 +12,11 @@ brew update && brew install node@10
 echo "Forcing link of Node 10..."
 brew link --force node@10
 echo "Installing Yarn Package Manager..."
-brew update && brew install yarn --without-node
+curl -o- -L https://yarnpkg.com/install.sh | bash
 echo "Installing Facebook's Watchman..."
 brew update && brew install watchman
-echo "Installing CocoaPods..."
-brew update && brew cask install cocoapods
+echo "Installing CocoaPods... (Admin's Password is needed)"
+sudo gem install cocoapods
 echo "Installing Java Development Kit (JDK)..."
 brew update && brew tap AdoptOpenJDK/openjdk && brew cask install adoptopenjdk8
 echo "Installing Android Studio..."
