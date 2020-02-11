@@ -16,3 +16,7 @@ Script that install on macOS the necessary tools to start developing mobile apps
 - [Xcode - iOS IDE](https://developer.apple.com/xcode/)
 - [TypeScript - Globally](https://www.typescriptlang.org/)
 - [Jest - JavaScript Testing Framework](https://jestjs.io/)
+
+To keep in mind: 
+- Installing [Xcode](https://developer.apple.com/xcode/) **requires being signed in with an Apple ID already inside the App Store App.**
+- By using the `sudo` commmand inside this script you'll be needed to type your admin password.
