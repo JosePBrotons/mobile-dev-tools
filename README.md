@@ -16,7 +16,9 @@ Script that install on macOS the necessary tools to start developing mobile apps
 - [Xcode - iOS IDE](https://developer.apple.com/xcode/)
 - [TypeScript - Globally](https://www.typescriptlang.org/)
 - [Jest - JavaScript Testing Framework](https://jestjs.io/)
+- [ngrok - Secure introspectable tunnel to localhost](https://ngrok.com/)
 
 To keep in mind: 
 - Installing [Xcode](https://developer.apple.com/xcode/) **requires being signed in with an Apple ID already inside the App Store App.**
 - By using the `sudo` commmand inside this script you'll be needed to type your admin password.
+- To install *yarn global modules* you should restart the terminal an execute the `mobile-global-modules.sh` file.
