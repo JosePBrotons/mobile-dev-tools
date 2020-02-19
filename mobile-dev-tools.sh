@@ -11,6 +11,32 @@ echo "Installing Node 10 LTS Version..."
 brew update && brew install node@10
 echo "Forcing link of Node 10..."
 brew link --force node@10
+"Verifying if .bash_profile file does exist..."
+cd --
+    if [ -e .bash_profile ]
+        then
+            echo ".bash_profile file exists."
+                if grep -Fxq 'export ANDROID_HOME=$HOME/Library/Android/sdk' .bash_profile
+                    then
+                        echo 'Found modified .bash_profile, not modifying...'
+                    else
+                        echo "Adding ANDROID_HOME Paths..."
+                        echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> .bash_proifile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> .bash_proifile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/tools' >> .bash_proifile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/tools/bin' >> .bash_proifile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> .bash_proifile
+                fi
+    else
+        echo "Creating .bash_profile file..."
+        touch .bash_profile
+            echo "Adding ANDROID_HOME Paths..."
+            echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> .bash_proifile
+            echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> .bash_proifile
+            echo 'export PATH=$PATH:$ANDROID_HOME/tools' >> .bash_proifile
+            echo 'export PATH=$PATH:$ANDROID_HOME/tools/bin' >> .bash_proifile
+            echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> .bash_proifile
+    fi
 echo "Installing Yarn Package Manager..."
 curl -o- -L https://yarnpkg.com/install.sh | bash
 echo "Installing Facebook's Watchman..."
@@ -27,7 +53,5 @@ echo "Installing Mac App Store CLI..."
 brew update && brew install mas
 echo "Installing Xcode by using the M.A.S CLI..."
 mas install 497799835
-echo "Installing TypeScript Globally..."
-yarn global add typescript
-echo "Installing Jest Globally..."
-yarn global add jest
+echo "Installing Fastlane for app automation..."
+brew install fastlane
