@@ -21,21 +21,21 @@ cd --
                         echo 'Found modified .bash_profile, not modifying...'
                     else
                         echo "Adding ANDROID_HOME Paths..."
-                        echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> .bash_proifile
-                        echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> .bash_proifile
-                        echo 'export PATH=$PATH:$ANDROID_HOME/tools' >> .bash_proifile
-                        echo 'export PATH=$PATH:$ANDROID_HOME/tools/bin' >> .bash_proifile
-                        echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> .bash_proifile
+                        echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> .bash_profile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> .bash_profile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/tools' >> .bash_profile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/tools/bin' >> .bash_profile
+                        echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> .bash_profile
                 fi
     else
         echo "Creating .bash_profile file..."
         touch .bash_profile
             echo "Adding ANDROID_HOME Paths..."
-            echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> .bash_proifile
-            echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> .bash_proifile
-            echo 'export PATH=$PATH:$ANDROID_HOME/tools' >> .bash_proifile
-            echo 'export PATH=$PATH:$ANDROID_HOME/tools/bin' >> .bash_proifile
-            echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> .bash_proifile
+            echo 'export ANDROID_HOME=$HOME/Library/Android/sdk' >> .bash_profile
+            echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> .bash_profile
+            echo 'export PATH=$PATH:$ANDROID_HOME/tools' >> .bash_profile
+            echo 'export PATH=$PATH:$ANDROID_HOME/tools/bin' >> .bash_profile
+            echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> .bash_profile
     fi
 echo "Installing Yarn Package Manager..."
 curl -o- -L https://yarnpkg.com/install.sh | bash
