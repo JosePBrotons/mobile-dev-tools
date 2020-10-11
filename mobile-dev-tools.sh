@@ -47,8 +47,12 @@ echo "Installing Java Development Kit (JDK)..."
 brew update && brew tap AdoptOpenJDK/openjdk && brew cask install adoptopenjdk11
 echo "Installing Android Studio..."
 brew update && brew cask install android-studio
+echo "Installing Flutter..."
+brew update && brew cask install flutter
 echo "Installing React Native Debugger"
 brew update && brew cask install react-native-debugger
+echo "Installing Facebook's Flipper"
+brew update && brew cask install flipper
 echo "Installing Mac App Store CLI..."
 brew update && brew install mas
 echo "Installing Xcode by using the M.A.S CLI..."
