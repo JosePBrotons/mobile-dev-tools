@@ -9,6 +9,7 @@ Script that install on macOS the necessary tools to start developing mobile apps
 - [Node 10 LTS](https://nodejs.org/en/)
 - [Yarn Package Manager](https://yarnpkg.com/)
 - [Flutter](https://flutter.dev)
+- [Flipper](https://fbflipper.com)
 - [Facebook's Watchman - A File Watching Service](https://facebook.github.io/watchman/)
 - [CocoaPods - Dependency Manager for Swift and Objective-C](https://cocoapods.org/)
 - [JDK - Java Development Kit](https://openjdk.java.net/)
