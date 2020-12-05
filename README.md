@@ -27,11 +27,11 @@ Script that install on macOS the necessary tools to start developing on Java and
 
 # Usage
 
-First make sure you clone this project using git:
+First make sure you clone this project using `git`:
 
     $ git clone git@github.com:JosePBrotons/mobile-dev-tools.git
 
-Then, enter the project's folder and execute the script by using sh command:
+Then, enter the project's folder and execute the script by using `sh` command:
 
     $ sh mobile-dev-tools.sh -rn (React Native)
     $ sh mobile-dev-tools.sh -flutter (Flutter)
