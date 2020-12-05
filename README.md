@@ -1,7 +1,9 @@
 # Mobile Dev Tools
-Script that install on macOS the necessary tools to start developing mobile apps with React Native and Flutter.
+
+Script that install on macOS the necessary tools to start developing on Java and also mobile apps with React Native and Flutter.
 
 # What does this script install?
+
 - [Homebrew Package Manager](https://brew.sh/)
 - [iTerm2 Terminal Emulator](https://iterm2.com/)
 - [Postman for API Development](https://www.postman.com/)
@@ -19,8 +21,21 @@ Script that install on macOS the necessary tools to start developing mobile apps
 - [TypeScript - Globally](https://www.typescriptlang.org/)
 - [Jest - JavaScript Testing Framework](https://jestjs.io/)
 - [ngrok - Secure introspectable tunnel to localhost](https://ngrok.com/)
+- [Maven](https://maven.apache.org/)
+- [IntelliJ's IDEA](https://www.jetbrains.com/idea/)
 
-To keep in mind: 
+# Usage
+
+First make sure you clone this project using git:
+$ git clone git@github.com:JosePBrotons/mobile-dev-tools.git
+
+Then, enter the project's folder and execute the script by using sh command:
+$ sh mobile-dev-tools.sh -rn (React Native)
+$ sh mobile-dev-tools.sh -flutter (Flutter)
+$ sh mobile-dev-tools.sh -java (Java)
+
+To keep in mind:
+
 - Installing [Xcode](https://developer.apple.com/xcode/) **requires being signed in with an Apple ID already inside the App Store App.**
 - By using the `sudo` commmand inside this script you'll be needed to type your admin password.
-- To install *yarn global modules* you should restart the terminal an execute the `mobile-global-modules.sh` file.
+- To install _yarn global modules_ you should restart the terminal an execute the `mobile-global-modules.sh` file inside the React Native folder.
