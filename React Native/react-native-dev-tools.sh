@@ -1,11 +1,12 @@
 echo "Welcome, this script will install the dependencies and libraries that will help you throughout React Native's mobile development"
+source ./Misc/install-command-line-tools.sh
 source ./Misc/check-brew-installation.sh
 echo "Installing iTerm2..."
-brew update && brew cask install iterm2
+brew update && brew install --cask iterm2
 echo "Installing Postman..."
-brew update && brew cask install postman
+brew update && brew install --cask postman
 echo "Installing VSCode..."
-brew update && brew cask install visual-studio-code
+brew update && brew install --cask visual-studio-code
 echo "Installing Node 10 LTS Version..."
 brew update && brew install node@10
 echo "Forcing link of Node 10..."
@@ -19,13 +20,13 @@ brew update && brew install watchman
 echo "Installing CocoaPods... (Admin's Password is needed)"
 sudo gem install cocoapods
 echo "Installing Java Development Kit (JDK)..."
-brew update && brew tap AdoptOpenJDK/openjdk && brew cask install adoptopenjdk11
+brew update && brew tap AdoptOpenJDK/openjdk && brew install --cask adoptopenjdk11
 echo "Installing Android Studio..."
-brew update && brew cask install android-studio
+brew update && brew install --cask android-studio
 echo "Installing React Native Debugger"
-brew update && brew cask install react-native-debugger
+brew update && brew install --cask react-native-debugger
 echo "Installing Facebook's Flipper"
-brew update && brew cask install flipper
+brew update && brew install --cask flipper
 echo "Installing Mac App Store CLI..."
 brew update && brew install mas
 echo "Installing Xcode by using the M.A.S CLI..."
