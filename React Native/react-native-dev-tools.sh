@@ -1,16 +1,16 @@
 echo "Welcome, this script will install the dependencies and libraries that will help you throughout React Native's mobile development"
 source ./Misc/install-command-line-tools.sh
-source ./Misc/check-brew-installation.sh
+source ./Misc/install-brew.sh
 echo "Installing iTerm2..."
 brew update && brew install --cask iterm2
 echo "Installing Postman..."
 brew update && brew install --cask postman
 echo "Installing VSCode..."
 brew update && brew install --cask visual-studio-code
-echo "Installing Node 10 LTS Version..."
-brew update && brew install node@10
-echo "Forcing link of Node 10..."
-brew link --force node@10
+echo "Installing Node 12 LTS Version..."
+brew update && brew install node@12
+echo "Forcing link of Node 12.."
+brew link --force node@12
 echo "Check for Android Home Path"
 source ./Misc/set-android-home-path.sh
 echo "Installing Yarn Package Manager..."

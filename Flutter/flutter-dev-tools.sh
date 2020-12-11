@@ -1,5 +1,5 @@
 echo "Welcome, this script will install the dependencies and libraries that will help you throughout Flutter mobile development"
-source ./Misc/check-brew-installation.sh
+source ./Misc/install-brew.sh
 echo "Installing iTerm2..."
 brew update && brew install --cask iterm2
 echo "Installing Postman..."
