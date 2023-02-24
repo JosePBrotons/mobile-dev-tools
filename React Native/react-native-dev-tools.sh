@@ -20,7 +20,7 @@ brew update && brew install watchman
 echo "Installing CocoaPods... (Admin's Password is needed)"
 sudo gem install cocoapods
 echo "Installing Java Development Kit (JDK)..."
-brew update && brew tap AdoptOpenJDK/openjdk && brew install --cask adoptopenjdk11
+brew update && brew tap homebrew/cask-versions && brew install --cask zulu11
 echo "Installing Android Studio..."
 brew update && brew install --cask android-studio
 echo "Installing React Native Debugger"
