@@ -1,4 +1,3 @@
-
 # Mobile Dev Tools
 
 Script that install on macOS the necessary tools to start developing on Java and also mobile apps with React Native and Flutter.
@@ -9,7 +8,7 @@ Script that install on macOS the necessary tools to start developing on Java and
 - [iTerm2 Terminal Emulator](https://iterm2.com/)
 - [Postman for API Development](https://www.postman.com/)
 - [Visual Studio Code Editor](https://code.visualstudio.com/)
-- [Node 10 LTS](https://nodejs.org/en/)
+- [Node 18 LTS](https://nodejs.org/en/)
 - [Yarn Package Manager](https://yarnpkg.com/)
 - [Flutter](https://flutter.dev)
 - [Flipper](https://fbflipper.com)

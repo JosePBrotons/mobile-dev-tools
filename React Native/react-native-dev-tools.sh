@@ -7,10 +7,10 @@ echo "Installing Postman..."
 brew update && brew install --cask postman
 echo "Installing VSCode..."
 brew update && brew install --cask visual-studio-code
-echo "Installing Node 12 LTS Version..."
-brew update && brew install node@12
-echo "Forcing link of Node 12.."
-brew link --force node@12
+echo "Installing Node 18 LTS Version..."
+brew update && brew install node@18
+echo "Forcing link of Node 18.."
+brew link --force node@18
 echo "Check for Android Home Path"
 source ./Misc/set-android-home-path.sh
 echo "Installing Yarn Package Manager..."
