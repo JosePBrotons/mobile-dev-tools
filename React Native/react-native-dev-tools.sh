@@ -18,13 +18,11 @@ curl -o- -L https://yarnpkg.com/install.sh | bash
 echo "Installing Facebook's Watchman..."
 brew update && brew install watchman
 echo "Installing CocoaPods... (Admin's Password is needed)"
-sudo gem install cocoapods
+brew install cocoapods
 echo "Installing Java Development Kit (JDK)..."
 brew update && brew tap homebrew/cask-versions && brew install --cask zulu11
 echo "Installing Android Studio..."
 brew update && brew install --cask android-studio
-echo "Installing React Native Debugger"
-brew update && brew install --cask react-native-debugger
 echo "Installing Facebook's Flipper"
 brew update && brew install --cask flipper
 echo "Installing Mac App Store CLI..."
