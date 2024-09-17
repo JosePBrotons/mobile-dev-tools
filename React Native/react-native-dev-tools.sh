@@ -7,10 +7,10 @@ echo "Installing Postman..."
 brew update && brew install --cask postman
 echo "Installing VSCode..."
 brew update && brew install --cask visual-studio-code
-echo "Installing Node 18 LTS Version..."
-brew update && brew install node@18
-echo "Forcing link of Node 18.."
-brew link --force node@18
+echo "Installing Node 20 LTS Version..."
+brew update && brew install node@20
+echo "Forcing link of Node 20.."
+brew link --force node@20
 echo "Check for Android Home Path"
 source ./Misc/set-android-home-path.sh
 echo "Installing Yarn Package Manager..."
@@ -20,7 +20,7 @@ brew update && brew install watchman
 echo "Installing CocoaPods... (Admin's Password is needed)"
 brew install cocoapods
 echo "Installing Java Development Kit (JDK)..."
-brew update && brew tap homebrew/cask-versions && brew install --cask zulu11
+brew update && brew tap homebrew/cask-versions && brew install --cask zulu@17
 echo "Installing Android Studio..."
 brew update && brew install --cask android-studio
 echo "Installing Facebook's Flipper"
