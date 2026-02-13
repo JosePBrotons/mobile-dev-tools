@@ -9,9 +9,9 @@ brew update && brew install --cask visual-studio-code
 echo "Check for Android Home Path"
 source ./Misc/set-android-home-path.sh
 echo "Installing CocoaPods... (Admin's Password is needed)"
-sudo gem install cocoapods
+brew install cocoapods
 echo "Installing Java Development Kit (JDK)..."
-brew update && brew tap homebrew/cask-versions && brew install --cask zulu11
+brew update && brew install --cask zulu@17
 echo "Installing Android Studio..."
 brew update && brew install --cask android-studio
 echo "Installing Flutter..."
