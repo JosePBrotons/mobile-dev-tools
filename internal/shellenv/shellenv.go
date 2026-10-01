@@ -48,7 +48,7 @@ func EnsureLines(path string, lines []string) (bool, error) {
 		content = "\n" + content
 	}
 	if _, err := f.WriteString(content); err != nil {
-		f.Close()
+		_ = f.Close()
 		return false, fmt.Errorf("write %s: %w", path, err)
 	}
 	return true, f.Close()
@@ -62,7 +62,7 @@ func hasLine(path, line string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		if sc.Text() == line {
