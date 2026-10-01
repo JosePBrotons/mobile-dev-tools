@@ -182,7 +182,7 @@ func (a *app) install(ctx context.Context, args []string) error {
 	out := io.MultiWriter(a.stdout, logFile)
 	opts := plan.Options{Home: a.home, Log: out}
 	report := plan.Execute(ctx, p, a.runner, opts, func(e plan.Event) { printEvent(out, e) })
-	a.printSummary(report, logPath)
+	a.printSummary(p, report, logPath)
 	if report.Failed() {
 		return errors.New("some tools failed to install")
 	}
@@ -220,7 +220,7 @@ func printEvent(w io.Writer, e plan.Event) {
 	say(w, "[%s] %s\n", r.Name, r.Status)
 }
 
-func (a *app) printSummary(r plan.Report, logPath string) {
+func (a *app) printSummary(p *plan.Plan, r plan.Report, logPath string) {
 	order := []plan.Status{plan.StatusInstalled, plan.StatusPresent, plan.StatusSkipped, plan.StatusFailed}
 	byStatus := map[plan.Status][]string{}
 	for _, res := range r.Results {
@@ -237,8 +237,11 @@ func (a *app) printSummary(r plan.Report, logPath string) {
 		}
 	}
 	say(a.stdout, "\nLog: %s\n", logPath)
-	if len(byStatus[plan.StatusInstalled]) > 0 {
-		say(a.stdout, "Open a new terminal so PATH and profile changes take effect.\n")
+	if steps := plan.NextSteps(p, r); len(steps) > 0 {
+		say(a.stdout, "\nNext steps:\n")
+		for _, s := range steps {
+			say(a.stdout, "  %s\n", s)
+		}
 	}
 }
 

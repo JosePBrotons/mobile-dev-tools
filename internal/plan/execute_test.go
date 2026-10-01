@@ -142,3 +142,20 @@ func TestExecuteAndroidHomeHook(t *testing.T) {
 		})
 	}
 }
+
+func TestNextSteps(t *testing.T) {
+	a := tool("a", catalog.MethodScript)
+	a.NextSteps = []string{"sign in"}
+	b := tool("b", catalog.MethodScript)
+	b.NextSteps = []string{"never shown"}
+	p := &Plan{Items: []Item{{Tool: a}, {Tool: b, Installed: true}}}
+
+	got := NextSteps(p, Report{Results: []Result{{ID: "a", Status: StatusInstalled}, {ID: "b", Status: StatusPresent}}})
+	want := []string{"a: sign in", GenericNextStep}
+	if strings.Join(got, "|") != strings.Join(want, "|") {
+		t.Fatalf("got %v, want %v", got, want)
+	}
+	if got := NextSteps(p, Report{Results: []Result{{ID: "b", Status: StatusPresent}}}); got != nil {
+		t.Fatalf("got %v, want none", got)
+	}
+}

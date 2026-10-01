@@ -163,3 +163,29 @@ func applyEdits(it Item, opts Options) error {
 func logf(w io.Writer, format string, args ...any) {
 	_, _ = fmt.Fprintf(w, format, args...)
 }
+
+// GenericNextStep is shown whenever something was installed.
+const GenericNextStep = "Open a new terminal so PATH and profile changes take effect."
+
+// NextSteps lists the follow-ups for what the report says was installed:
+// the catalog's next_steps in plan order, then the generic one.
+func NextSteps(p *Plan, r Report) []string {
+	installed := map[string]bool{}
+	for _, res := range r.Results {
+		if res.Status == StatusInstalled {
+			installed[res.ID] = true
+		}
+	}
+	if len(installed) == 0 {
+		return nil
+	}
+	var steps []string
+	for _, it := range p.Items {
+		if installed[it.Tool.ID] {
+			for _, s := range it.Tool.NextSteps {
+				steps = append(steps, it.Tool.Name+": "+s)
+			}
+		}
+	}
+	return append(steps, GenericNextStep)
+}
