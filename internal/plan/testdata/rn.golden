@@ -1,4 +1,4 @@
-Plan: 19 tools, 16 to install, 3 already installed
+Plan: 20 tools, 17 to install, 3 already installed
 
   STATUS     TOOL                      COMMANDS
   installed  Xcode Command Line Tools
@@ -8,6 +8,7 @@ Plan: 19 tools, 16 to install, 3 already installed
   install    GitHub CLI                brew install gh
   install    iTerm2                    brew install --cask iterm2
   install    Postman                   brew install --cask postman
+  install    RapidAPI                  brew install --cask rapidapi
   install    Visual Studio Code        brew install --cask visual-studio-code
   install    nvm                       curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
   install    Node.js LTS               nvm install --lts && nvm use --lts && nvm alias default 'lts/*'

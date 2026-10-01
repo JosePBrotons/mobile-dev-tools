@@ -75,12 +75,12 @@ tools:
 
 // ids the legacy scripts install, per profile. Update together with the scripts.
 var legacy = map[string][]string{
-	"rn": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "vscode", "nvm", "node", "pnpm",
+	"rn": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "rapidapi", "vscode", "nvm", "node", "pnpm",
 		"watchman", "cocoapods", "jdk", "android-studio", "mas", "xcode", "fastlane", "typescript", "ngrok"},
-	"flutter": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "vscode", "cocoapods", "jdk",
+	"flutter": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "rapidapi", "vscode", "cocoapods", "jdk",
 		"android-studio", "flutter", "mas", "xcode", "fastlane"},
 	"java": {"xcode-clt", "homebrew", "git", "gh", "jdk", "intellij-idea", "maven"},
-	"web": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "vscode", "nvm", "node", "pnpm", "bun",
+	"web": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "rapidapi", "vscode", "nvm", "node", "pnpm", "bun",
 		"mkcert", "orbstack", "firefox-dev", "brave", "ungoogled-chromium", "typescript", "ngrok"},
 }
 

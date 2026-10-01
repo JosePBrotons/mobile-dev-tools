@@ -11,6 +11,8 @@ echo "Installing iTerm2..."
 brew_cask iterm2
 echo "Installing Postman..."
 brew_cask postman
+echo "Installing RapidAPI..."
+brew_cask rapidapi
 echo "Installing VSCode..."
 brew_cask visual-studio-code
 echo "Check for Android Home Path"

@@ -12,6 +12,7 @@ Scripts that install on macOS the tools needed to develop in Java and to build m
 - [GitHub CLI](https://cli.github.com/)
 - [iTerm2 Terminal Emulator](https://iterm2.com/)
 - [Postman for API Development](https://www.postman.com/)
+- [RapidAPI](https://paw.cloud/)
 - [Visual Studio Code Editor](https://code.visualstudio.com/)
 - [nvm - Node Version Manager](https://github.com/nvm-sh/nvm)
 - [Node.js LTS](https://nodejs.org/en/)
@@ -33,6 +34,8 @@ Scripts that install on macOS the tools needed to develop in Java and to build m
 - [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium)
 - [Maven](https://maven.apache.org/)
 - [IntelliJ IDEA](https://www.jetbrains.com/idea/)
+
+Google Chrome is in the `mdt` catalog too but belongs to no profile, so it is never preselected: pick it in the TUI or with `mdt install --only chrome`.
 
 Jest is no longer installed globally: React Native projects ship it as a project dependency.
 

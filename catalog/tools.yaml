@@ -85,6 +85,17 @@ tools:
     requires: [homebrew]
     url: https://www.postman.com/
 
+  - id: rapidapi
+    name: RapidAPI
+    description: HTTP client for testing and describing APIs
+    category: terminals-editors
+    profiles: [rn, flutter, web]
+    method: cask
+    package: rapidapi
+    check: test -d /Applications/RapidAPI.app
+    requires: [homebrew]
+    url: https://paw.cloud/
+
   - id: vscode
     name: Visual Studio Code
     description: Code editor
@@ -199,6 +210,17 @@ tools:
     check: test -d "/Applications/Firefox Developer Edition.app"
     requires: [homebrew]
     url: https://www.mozilla.org/firefox/developer/
+
+  - id: chrome
+    name: Google Chrome
+    description: Browser for testing, not preselected by any profile
+    category: browsers
+    profiles: []
+    method: cask
+    package: google-chrome
+    check: test -d "/Applications/Google Chrome.app"
+    requires: [homebrew]
+    url: https://www.google.com/chrome/
 
   - id: brave
     name: Brave
