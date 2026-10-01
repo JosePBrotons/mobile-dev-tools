@@ -103,6 +103,40 @@ func TestResolveOrdersDependenciesFirst(t *testing.T) {
 	}
 }
 
+func TestNewPrunesUnneededDependencies(t *testing.T) {
+	c := load(t)
+	tests := []struct {
+		name    string
+		only    []string
+		missing []string // checks that fail; everything else is installed
+		want    []string
+	}{
+		{"dependent installed", []string{"typescript"}, []string{"test -s"}, []string{"typescript"}},
+		{"installed dependency of a missing tool is kept", []string{"typescript"}, []string{"command -v tsc"},
+			[]string{"node", "typescript"}},
+		{"whole chain kept on a fresh machine", []string{"typescript"}, []string{"test -s", "command -v node", "command -v tsc"},
+			[]string{"nvm", "node", "typescript"}},
+		{"homebrew present, clt not needed", []string{"cocoapods"}, []string{"command -v pod"},
+			[]string{"homebrew", "cocoapods"}},
+		{"selected tools are never pruned", []string{"nvm", "node"}, nil, []string{"nvm", "node"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fake := &runner.Fake{Fail: map[string]error{}}
+			for _, m := range tt.missing {
+				fake.Fail[m] = errors.New("exit 1")
+			}
+			p, err := New(context.Background(), c, tt.only, fake)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := ids(p.Items); !slices.Equal(got, tt.want) {
+				t.Fatalf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestCommands(t *testing.T) {
 	tests := []struct {
 		tool catalog.Tool

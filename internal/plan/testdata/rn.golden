@@ -1,26 +1,26 @@
 Plan: 19 tools, 16 to install, 3 already installed
 
-  STATUS     TOOL                      WHY  COMMANDS
-  installed  Xcode Command Line Tools  selected
-  installed  Homebrew                  selected
-  installed  Git                       selected
-  install    (Homebrew update)                   brew update
-  install    GitHub CLI                selected  brew install gh
-  install    iTerm2                    selected  brew install --cask iterm2
-  install    Postman                   selected  brew install --cask postman
-  install    Visual Studio Code        selected  brew install --cask visual-studio-code
-  install    nvm                       selected  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
-  install    Node.js LTS               selected  nvm install --lts && nvm use --lts && nvm alias default 'lts/*'
-  install    pnpm                      selected  brew install pnpm
-  install    TypeScript                selected  npm install -g typescript
-  install    ngrok                     selected  brew install --cask ngrok
-  install    Watchman                  selected  brew install watchman
-  install    CocoaPods                 selected  brew install cocoapods
-  install    JDK 17 (Azul Zulu)        selected  brew install --cask zulu@17
-  install    Android Studio            selected  brew install --cask android-studio && add "export ANDROID_HOME=$HOME/Library/Android/sdk" to ~/.zprofile
-  install    mas                       selected  brew install mas
-  install    Xcode                     selected  mas install 497799835
-  install    Fastlane                  selected  brew install fastlane
+  STATUS     TOOL                      COMMANDS
+  installed  Xcode Command Line Tools
+  installed  Homebrew
+  installed  Git
+  install    (Homebrew update)         brew update
+  install    GitHub CLI                brew install gh
+  install    iTerm2                    brew install --cask iterm2
+  install    Postman                   brew install --cask postman
+  install    Visual Studio Code        brew install --cask visual-studio-code
+  install    nvm                       curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
+  install    Node.js LTS               nvm install --lts && nvm use --lts && nvm alias default 'lts/*'
+  install    pnpm                      brew install pnpm
+  install    TypeScript                npm install -g typescript
+  install    ngrok                     brew install --cask ngrok
+  install    Watchman                  brew install watchman
+  install    CocoaPods                 brew install cocoapods
+  install    JDK 17 (Azul Zulu)        brew install --cask zulu@17
+  install    Android Studio            brew install --cask android-studio && add "export ANDROID_HOME=$HOME/Library/Android/sdk" to ~/.zprofile
+  install    mas                       brew install mas
+  install    Xcode                     mas install 497799835
+  install    Fastlane                  brew install fastlane
 
 Notes:
   Android Studio: Large download

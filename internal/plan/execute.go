@@ -19,6 +19,8 @@ const (
 	StatusPresent   Status = "already installed"
 	StatusSkipped   Status = "skipped"
 	StatusFailed    Status = "failed"
+	// StatusDone is used for the Homebrew update, which installs nothing.
+	StatusDone Status = "done"
 )
 
 // Result is the outcome of one tool.
@@ -120,7 +122,6 @@ func Execute(ctx context.Context, p *Plan, r runner.Runner, opts Options, emit f
 			res.Status = StatusFailed
 			res.Err = err
 			broken[t.ID] = t.Name
-			logf(opts.Log, "==> %s failed: %v\n", t.Name, err)
 		}
 		emit(Event{Kind: Finished, Result: res})
 		report.Results = append(report.Results, res)
@@ -133,10 +134,9 @@ func brewUpdate(ctx context.Context, r runner.Runner, log io.Writer, emit func(E
 	res := Result{ID: "brew-update", Name: "Homebrew update"}
 	emit(Event{Kind: Started, Result: res})
 	logf(log, "==> Updating Homebrew...\n")
-	res.Status = StatusInstalled
+	res.Status = StatusDone
 	if err := r.Run(ctx, shellenv.Prelude+BrewUpdate, log); err != nil {
-		res.Status, res.Err = StatusFailed, err
-		logf(log, "==> Homebrew update failed, continuing: %v\n", err)
+		res.Status, res.Err = StatusFailed, fmt.Errorf("%w (continuing)", err)
 	}
 	emit(Event{Kind: Finished, Result: res})
 }

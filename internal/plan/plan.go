@@ -67,7 +67,31 @@ func New(ctx context.Context, c *catalog.Catalog, ids []string, r runner.Runner)
 	for i := range items {
 		items[i].Installed = installed[items[i].Tool.ID]
 	}
-	return &Plan{Items: items}, nil
+	return &Plan{Items: prune(items)}, nil
+}
+
+// prune drops dependencies that no pending tool needs, for example nvm
+// when Node.js is already installed some other way. Items are ordered
+// dependencies first, so a reverse walk sees every dependent first.
+func prune(items []Item) []Item {
+	needed := map[string]bool{}
+	keep := make([]bool, len(items))
+	for i := len(items) - 1; i >= 0; i-- {
+		it := items[i]
+		keep[i] = it.RequiredBy == "" || needed[it.Tool.ID]
+		if keep[i] && !it.Installed {
+			for _, r := range it.Tool.Requires {
+				needed[r] = true
+			}
+		}
+	}
+	var out []Item
+	for i, it := range items {
+		if keep[i] {
+			out = append(out, it)
+		}
+	}
+	return out
 }
 
 // Resolve adds every required tool and orders the result so dependencies
@@ -183,8 +207,9 @@ func (p *Plan) Print(out io.Writer) error {
 	fmt.Fprintf(&w, "Plan: %d tools, %d to install, %d already installed\n\n",
 		len(p.Items), pending, len(p.Items)-pending)
 
-	tw := tabwriter.NewWriter(&w, 0, 0, 2, ' ', 0)
-	rows := []string{"  STATUS\tTOOL\tWHY\tCOMMANDS"}
+	var table bytes.Buffer
+	tw := tabwriter.NewWriter(&table, 0, 0, 2, ' ', 0)
+	rows := []string{"  STATUS\tTOOL\tCOMMANDS"}
 	updated := false
 	for _, it := range p.Items {
 		status, cmds := "installed", profileEdits(it.Tool)
@@ -192,15 +217,15 @@ func (p *Plan) Print(out io.Writer) error {
 			status = "install"
 			if usesBrew(it.Tool) && !updated {
 				updated = true
-				rows = append(rows, "  install\t(Homebrew update)\t\t"+BrewUpdate)
+				rows = append(rows, "  install\t(Homebrew update)\t"+BrewUpdate)
 			}
 			cmds = append(Commands(it.Tool), cmds...)
 		}
-		line := fmt.Sprintf("  %s\t%s\t%s", status, it.Tool.Name, it.Reason())
-		if len(cmds) > 0 {
-			line += "\t" + strings.Join(cmds, " && ")
+		detail := strings.Join(cmds, " && ")
+		if it.RequiredBy != "" {
+			detail = strings.TrimSpace(detail + "  (" + it.Reason() + ")")
 		}
-		rows = append(rows, line)
+		rows = append(rows, fmt.Sprintf("  %s\t%s\t%s", status, it.Tool.Name, detail))
 	}
 	for _, row := range rows {
 		if _, err := fmt.Fprintln(tw, row); err != nil {
@@ -209,6 +234,12 @@ func (p *Plan) Print(out io.Writer) error {
 	}
 	if err := tw.Flush(); err != nil {
 		return err
+	}
+	for _, line := range strings.SplitAfter(table.String(), "\n") {
+		w.WriteString(strings.TrimRight(line, " \n"))
+		if strings.HasSuffix(line, "\n") {
+			w.WriteString("\n")
+		}
 	}
 
 	var notes []string
