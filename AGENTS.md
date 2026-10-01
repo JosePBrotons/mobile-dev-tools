@@ -14,6 +14,7 @@ React Native/react-native-dev-tools.sh
 React Native/mobile-global-modules.sh   npm globals + ngrok, sourced by the RN profile
 Flutter/flutter-dev-tools.sh
 Java/java-dev-tools.sh
+Web/web-dev-tools.sh
 Misc/install-command-line-tools.sh  Xcode CLT (skips if present)
 Misc/install-brew.sh                Homebrew (skips if present, loads shellenv)
 Misc/brew-helpers.sh                brew_formula / brew_cask helpers, one brew update
@@ -54,7 +55,7 @@ Agent sandboxes and CI runners are usually Linux, so the install scripts cannot 
 
 ```
 for f in mobile-dev-tools.sh */*.sh; do bash -n "$f"; done
-shellcheck -x -e SC1091 mobile-dev-tools.sh Misc/*.sh Java/*.sh Flutter/*.sh "React Native"/*.sh
+shellcheck -x -e SC1091 mobile-dev-tools.sh Misc/*.sh Java/*.sh Flutter/*.sh Web/*.sh "React Native"/*.sh
 ```
 
 Both must pass with no output. For Go code, also run `go test ./...` and `mdt install --dry-run --profile <x>`. Say in your summary that scripts were statically checked only, unless they were run on macOS.
