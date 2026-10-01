@@ -262,3 +262,13 @@ func pad(s string, n int) string {
 	}
 	return s
 }
+
+// Run shows the TUI until the user quits and reports whether any tool
+// failed to install.
+func Run(ctx context.Context, cfg Config) (failed bool, err error) {
+	final, err := tea.NewProgram(New(ctx, cfg), tea.WithAltScreen(), tea.WithContext(ctx)).Run()
+	if err != nil {
+		return false, err
+	}
+	return final.(Model).Failed(), nil
+}

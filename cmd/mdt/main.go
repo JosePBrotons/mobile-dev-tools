@@ -17,12 +17,17 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"golang.org/x/term"
+
 	"github.com/josepbrotons/mobile-dev-tools/internal/catalog"
 	"github.com/josepbrotons/mobile-dev-tools/internal/plan"
 	"github.com/josepbrotons/mobile-dev-tools/internal/runner"
+	"github.com/josepbrotons/mobile-dev-tools/internal/tui"
 )
 
 const usage = `Usage:
+  mdt                  interactive mode (needs a terminal)
+  mdt tui              same as above
   mdt install (--profile <id> | --only <id,id,...>) [--dry-run] [--yes]
   mdt list
 
@@ -43,6 +48,10 @@ type app struct {
 	stdin  io.Reader
 	stdout io.Writer
 	stderr io.Writer
+	// tty is true when stdin and stdout are terminals.
+	tty bool
+	// tui runs the interactive UI and reports whether any tool failed.
+	tui func(context.Context) (failed bool, err error)
 }
 
 func main() {
@@ -61,7 +70,9 @@ func main() {
 		stdin:  os.Stdin,
 		stdout: os.Stdout,
 		stderr: os.Stderr,
+		tty:    term.IsTerminal(int(os.Stdin.Fd())) && term.IsTerminal(int(os.Stdout.Fd())),
 	}
+	a.tui = a.runTUI
 	code := a.run(ctx, os.Args[1:])
 	stop()
 	os.Exit(code)
@@ -69,12 +80,17 @@ func main() {
 
 // run executes a subcommand and returns the exit code.
 func (a *app) run(ctx context.Context, args []string) int {
-	if len(args) == 0 {
+	if len(args) == 0 && !a.tty {
 		say(a.stderr, "%s", usage)
 		return 2
 	}
 	var err error
+	if len(args) == 0 {
+		args = []string{"tui"}
+	}
 	switch args[0] {
+	case "tui":
+		err = a.interactive(ctx)
 	case "install":
 		err = a.install(ctx, args[1:])
 	case "list":
@@ -187,6 +203,40 @@ func (a *app) install(ctx context.Context, args []string) error {
 		return errors.New("some tools failed to install")
 	}
 	return nil
+}
+
+func (a *app) interactive(ctx context.Context) error {
+	if !a.tty {
+		return errors.New("the interactive mode needs a terminal; use mdt install instead")
+	}
+	failed, err := a.tui(ctx)
+	if err != nil {
+		return err
+	}
+	if failed {
+		return errors.New("some tools failed to install")
+	}
+	return nil
+}
+
+func (a *app) runTUI(ctx context.Context) (bool, error) {
+	c, err := catalog.Load()
+	if err != nil {
+		return false, err
+	}
+	return tui.Run(ctx, tui.Config{
+		Catalog: c,
+		// The TUI owns the terminal, so scripts get no stdin. Passwords
+		// are cached up front through SudoCmd instead.
+		Runner: runner.Exec{},
+		Home:   a.home,
+		GOOS:   a.goos,
+		OpenLog: func() (string, io.WriteCloser, error) {
+			path, f, err := a.openLog()
+			return path, f, err
+		},
+		SudoCmd: runner.SudoValidate,
+	})
 }
 
 func (a *app) confirm() bool {
