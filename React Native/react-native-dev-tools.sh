@@ -3,6 +3,10 @@ echo "Welcome, this script will install the dependencies and libraries that will
 source ./Misc/install-command-line-tools.sh
 source ./Misc/install-brew.sh
 source ./Misc/brew-helpers.sh
+echo "Installing Git..."
+brew_formula git
+echo "Installing GitHub CLI..."
+brew_formula gh
 echo "Installing iTerm2..."
 brew_cask iterm2
 echo "Installing Postman..."
@@ -18,9 +22,8 @@ echo "Installing Node.js LTS version..."
 nvm install --lts
 nvm use --lts
 nvm alias default 'lts/*'
-echo "Enabling Corepack for Yarn..."
-corepack enable
-corepack prepare yarn@stable --activate
+echo "Installing pnpm..."
+brew_formula pnpm
 echo "Check for Android Home Path"
 source ./Misc/set-android-home-path.sh
 echo "Installing Facebook's Watchman..."
