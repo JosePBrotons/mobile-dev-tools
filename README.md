@@ -2,7 +2,7 @@
 
 Scripts that install on macOS the tools needed to develop in Java and to build mobile apps with React Native and Flutter.
 
-> A TUI that lets you choose exactly what to install is planned. See [ROADMAP.md](ROADMAP.md).
+> A Go CLI, `mdt`, is in preview (see below) and a TUI that lets you choose exactly what to install is planned. See [ROADMAP.md](ROADMAP.md).
 
 # What does this script install?
 
@@ -57,6 +57,17 @@ To keep in mind:
 - Some steps use `sudo`, so you may be asked for your admin password.
 - The web profile runs `mkcert -install`, which asks for your admin password. OrbStack is free for personal use only.
 - `ANDROID_HOME` is added to `~/.zprofile`. Open a new terminal after the script finishes so it takes effect.
+
+# mdt (preview)
+
+`mdt` is the Go replacement for the scripts. It reads the same tool list, skips what is already installed, and installs only what a profile or your own selection needs. It needs [Go](https://go.dev/) 1.24 or newer for now:
+
+    $ go run ./cmd/mdt list                                  (profiles and tool ids)
+    $ go run ./cmd/mdt install --profile rn --dry-run        (show the plan only)
+    $ go run ./cmd/mdt install --profile rn                  (asks before installing)
+    $ go run ./cmd/mdt install --only node,watchman --yes    (pick tools, no prompt)
+
+Required tools are added automatically (Node.js brings nvm, CocoaPods brings Homebrew). A failed tool does not stop the rest; the summary lists it and the log is in `~/Library/Logs/mobile-dev-tools/`. An interactive TUI is coming next.
 
 # Contributing
 

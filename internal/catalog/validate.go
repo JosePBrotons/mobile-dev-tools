@@ -9,8 +9,8 @@ import (
 
 var idPattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 
-// knownPostInstall lists the hooks the runner will implement.
-var knownPostInstall = []string{"android-home-env", "mkcert-install"}
+// KnownPostInstall lists the hooks internal/plan implements.
+var KnownPostInstall = []string{"android-home-env", "mkcert-install"}
 
 // Validate reports every problem found, joined into one error.
 func (c *Catalog) Validate() error {
@@ -79,7 +79,7 @@ func (c *Catalog) Validate() error {
 			}
 		}
 		for _, h := range t.PostInstall {
-			if !slices.Contains(knownPostInstall, h) {
+			if !slices.Contains(KnownPostInstall, h) {
 				add("tool %q: unknown post_install hook %q", t.ID, h)
 			}
 		}

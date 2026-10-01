@@ -48,7 +48,7 @@ tools:
     profiles: [rn, flutter, java, web]
     method: brew
     package: git
-    check: command -v git
+    check: brew list --formula git
     requires: [homebrew]
     url: https://git-scm.com/
 
