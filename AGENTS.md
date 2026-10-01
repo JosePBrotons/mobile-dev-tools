@@ -4,7 +4,7 @@ Conventions for anyone (human or AI agent) changing this repo. `CLAUDE.md` impor
 
 ## Project overview
 
-Installs mobile and Java development tools on macOS. Today it is a set of bash scripts driven by `mobile-dev-tools.sh -rn|-flutter|-java|-web`. The plan is a Go + Bubble Tea TUI (`mdt`) where the user picks what to install. Read [ROADMAP.md](ROADMAP.md) before starting larger work and keep it updated when a phase changes.
+Installs mobile and Java development tools on macOS. Today it is a set of bash scripts driven by `mobile-dev-tools.sh -rn|-flutter|-java|-web`, plus a Go CLI (`mdt install`) that installs from the catalog. The plan is a Bubble Tea TUI in `mdt` where the user picks what to install. Read [ROADMAP.md](ROADMAP.md) before starting larger work and keep it updated when a phase changes.
 
 ## Repo map
 
@@ -22,10 +22,15 @@ Misc/set-android-home-path.sh       ANDROID_HOME in ~/.zprofile (idempotent)
 go.mod                              Go module
 catalog/tools.yaml, catalog/embed.go  tool catalog and its go:embed
 internal/catalog/                   loader and validator for the catalog
+internal/runner/                    the only package that executes commands; Fake for tests
+internal/shellenv/                  prelude for every step, idempotent ~/.zprofile edits
+internal/detect/                    runs each tool's check
+internal/plan/                      resolve, dry-run output, execute with progress events
+cmd/mdt/                            CLI: mdt install, mdt list
 ROADMAP.md                          plan for the TUI
 ```
 
-Planned Go layout (Phase 2+): `cmd/mdt/`, `internal/{detect,plan,runner,shellenv,tui}/`, `catalog/tools.yaml`.
+Planned Go layout (Phase 3+): `internal/tui/`.
 
 ## Shell conventions
 
@@ -42,7 +47,9 @@ Planned Go layout (Phase 2+): `cmd/mdt/`, `internal/{detect,plan,runner,shellenv
 - Format with `gofmt`, lint with `golangci-lint`, test with `go test ./...`.
 - Only `internal/runner` executes commands. Everything else takes a `Runner` interface so tests can use a fake.
 - New tools are added to `catalog/tools.yaml`, not hardcoded in Go. `go:embed` cannot reach parent folders, so the embed lives in `catalog/embed.go`.
-- Until Phase 6, a tool added to the catalog must also be added to the legacy script for its profiles. `TestProfilesMatchLegacyScripts` checks this.
+- Until Phase 6, a tool added to the catalog must also be added to the legacy script for its profiles. `TestProfilesMatchLegacyScripts` and `TestCommandsMatchLegacyScripts` check this.
+- A new `post_install` hook goes in `catalog.KnownPostInstall` and in the `hooks` table in `internal/plan`.
+- The dry-run golden file lives in `internal/plan/testdata/`. After an intended change, run `go test ./internal/plan -update` and review the diff.
 - Prefer table-driven tests. Tests must never touch the real home folder; use `t.TempDir()`.
 - TUI code (`internal/tui`) holds no install logic; it calls `internal/plan` and `internal/runner`.
 

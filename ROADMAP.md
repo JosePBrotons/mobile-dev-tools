@@ -49,7 +49,13 @@ Move "what to install" out of scripts and into data: `catalog/tools.yaml`, embed
 - `post_install` hooks cover environment changes such as `ANDROID_HOME`.
 - `notes` surface warnings in the UI (needs sudo, needs Apple ID, large download).
 
-## Phase 2: Go core, no UI yet
+## Phase 2: Go core, no UI yet (done)
+
+Shipped: `mdt install (--profile <id> | --only a,b) [--dry-run] [--yes]` and `mdt list`. `internal/runner` (bash runner plus a fake), `internal/shellenv` (a prelude that loads Homebrew and nvm in every step, idempotent `~/.zprofile` edits), `internal/detect` (runs each tool's `check`) and `internal/plan` (dependency resolution, dry-run table, execution with progress events for the TUI). Dependencies that no pending tool needs are dropped, so Node.js installed outside nvm does not pull in nvm. Logs go to `~/Library/Logs/mobile-dev-tools/`. Real installs refuse to run outside macOS. `TestCommandsMatchLegacyScripts` checks parity: every package the legacy scripts install, and every script line, comes from the catalog.
+
+Deferred: version detection (the catalog has no version command yet) and the `.bash_profile` fallback for macOS older than 10.15. Not yet run on a real Mac.
+
+Original plan:
 
 ```
 cmd/mdt/            entry point, flag parsing
