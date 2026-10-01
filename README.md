@@ -1,9 +1,12 @@
 # Mobile Dev Tools
 
-Script that install on macOS the necessary tools to start developing on Java and also mobile apps with React Native and Flutter.
+Scripts that install on macOS the tools needed to develop in Java and to build mobile apps with React Native and Flutter.
+
+> A TUI that lets you choose exactly what to install is planned. See [ROADMAP.md](ROADMAP.md).
 
 # What does this script install?
 
+- [Xcode Command Line Tools](https://developer.apple.com/xcode/resources/)
 - [Homebrew Package Manager](https://brew.sh/)
 - [iTerm2 Terminal Emulator](https://iterm2.com/)
 - [Postman for API Development](https://www.postman.com/)
@@ -17,11 +20,13 @@ Script that install on macOS the necessary tools to start developing on Java and
 - [JDK 17 - Azul Zulu](https://www.azul.com/downloads/)
 - [Android Studio - Android's IDE](https://developer.android.com/studio/)
 - [Xcode - iOS IDE](https://developer.apple.com/xcode/)
-- [TypeScript - Globally](https://www.typescriptlang.org/)
-- [Jest - JavaScript Testing Framework](https://jestjs.io/)
-- [ngrok - Secure introspectable tunnel to localhost](https://ngrok.com/)
+- [Fastlane - App automation](https://fastlane.tools/)
+- [TypeScript - Globally (via npm)](https://www.typescriptlang.org/)
+- [ngrok - Secure introspectable tunnel to localhost (via Homebrew)](https://ngrok.com/)
 - [Maven](https://maven.apache.org/)
-- [IntelliJ's IDEA](https://www.jetbrains.com/idea/)
+- [IntelliJ IDEA](https://www.jetbrains.com/idea/)
+
+Jest is no longer installed globally: React Native projects ship it as a project dependency.
 
 # Usage
 
@@ -29,14 +34,20 @@ First make sure you clone this project using `git`:
 
     $ git clone git@github.com:JosePBrotons/mobile-dev-tools.git
 
-Then, enter the project's folder and execute the script by using `sh` command:
+Then run the script with `bash` (from any directory):
 
-    $ sh mobile-dev-tools.sh -rn (React Native)
-    $ sh mobile-dev-tools.sh -flutter (Flutter)
-    $ sh mobile-dev-tools.sh -java (Java)
+    $ bash mobile-dev-tools.sh -rn (React Native)
+    $ bash mobile-dev-tools.sh -flutter (Flutter)
+    $ bash mobile-dev-tools.sh -java (Java)
+
+Running it again is safe: tools that are already installed are skipped.
 
 To keep in mind:
 
 - Installing [Xcode](https://developer.apple.com/xcode/) **requires being signed in with an Apple ID already inside the App Store App.**
-- By using the `sudo` commmand inside this script you'll be needed to type your admin password.
-- To install _yarn global modules_ you should restart the terminal an execute the `mobile-global-modules.sh` file inside the React Native folder.
+- Some steps use `sudo`, so you may be asked for your admin password.
+- `ANDROID_HOME` is added to `~/.zprofile`. Open a new terminal after the script finishes so it takes effect.
+
+# Contributing
+
+Conventions for humans and AI agents live in [AGENTS.md](AGENTS.md).

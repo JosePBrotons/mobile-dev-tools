@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+# Run from the repo root so the relative `source` paths in each script resolve.
+cd "$(dirname "$0")" || exit 1
+
 if [[ $1 = "-rn" ]]; then
     echo "Installing React Native Dev Tools"
     source ./React\ Native/react-native-dev-tools.sh
