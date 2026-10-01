@@ -2,7 +2,7 @@
 
 ## Vision
 
-One binary, `mdt`, that you run on a fresh Mac. It checks the machine, shows what is already installed, lets you start from a profile (React Native, Flutter, Java or Custom), and then toggle individual tools on and off. You review the plan, confirm, and watch each tool install with live progress. It ends with a summary and next steps (open a new terminal, sign in to the App Store, accept Android SDK licenses).
+One binary, `mdt`, that you run on a fresh Mac. It checks the machine, shows what is already installed, lets you start from a profile (React Native, Flutter, Java, Web or Custom), and then toggle individual tools on and off. You review the plan, confirm, and watch each tool install with live progress. It ends with a summary and next steps (open a new terminal, sign in to the App Store, accept Android SDK licenses).
 
 The same engine runs without the UI for automation:
 
@@ -20,7 +20,9 @@ The same engine runs without the UI for automation:
 - Yarn 4 has no `yarn global`: TypeScript is installed with npm, ngrok with its Homebrew cask, global Jest dropped. Global modules now run as part of the React Native profile.
 - Version refresh: nvm `v0.40.8`; `intellij-idea-ce` (discontinued) replaced by `intellij-idea`; JDK stays on Zulu 17 as React Native still recommends it.
 
-## Phase 1: Declarative tool catalog
+## Phase 1: Declarative tool catalog (done)
+
+Shipped: `catalog/tools.yaml` (embedded through `catalog/embed.go`) and `internal/catalog` with strict loading, validation (unknown ids, cycles, missing packages) and a test that each profile matches the legacy scripts. Schema additions: `install` (shell lines for `script` tools), `url`, and top-level `categories` and `profiles` lists. A Web profile (pnpm, Bun, mkcert, OrbStack, extra browsers) was added to the catalog and to `Web/web-dev-tools.sh`, and pnpm replaced Yarn.
 
 Move "what to install" out of scripts and into data: `catalog/tools.yaml`, embedded in the binary with `go:embed`.
 
@@ -68,7 +70,7 @@ internal/shellenv/  idempotent edits to ~/.zprofile
 Screens, in order:
 
 1. **Welcome / system check**: macOS version, architecture, Xcode CLT, Homebrew, disk space.
-2. **Profile picker**: React Native, Flutter, Java, Custom.
+2. **Profile picker**: React Native, Flutter, Java, Web, Custom.
 3. **Tool checklist** grouped by category. Installed tools are marked and unchecked by default; dependencies are auto-checked with a reason ("required by CocoaPods").
 4. **Review**: exact commands to run, plus sudo and Apple ID warnings.
 5. **Progress**: per-tool spinner, scrollable live log pane.
