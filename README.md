@@ -2,7 +2,7 @@
 
 Scripts that install on macOS the tools needed to develop in Java and to build mobile apps with React Native and Flutter.
 
-> A Go CLI, `mdt`, is in preview (see below) and a TUI that lets you choose exactly what to install is planned. See [ROADMAP.md](ROADMAP.md).
+> A Go CLI and TUI, `mdt`, is in preview (see below). See [ROADMAP.md](ROADMAP.md).
 
 # What does this script install?
 
@@ -62,12 +62,14 @@ To keep in mind:
 
 `mdt` is the Go replacement for the scripts. It reads the same tool list, skips what is already installed, and installs only what a profile or your own selection needs. It needs [Go](https://go.dev/) 1.24 or newer for now:
 
+    $ go run ./cmd/mdt                                       (interactive TUI)
     $ go run ./cmd/mdt list                                  (profiles and tool ids)
     $ go run ./cmd/mdt install --profile rn --dry-run        (show the plan only)
     $ go run ./cmd/mdt install --profile rn                  (asks before installing)
     $ go run ./cmd/mdt install --only node,watchman --yes    (pick tools, no prompt)
 
-Required tools are added automatically (Node.js brings nvm, CocoaPods brings Homebrew). A failed tool does not stop the rest; the summary lists it and the log is in `~/Library/Logs/mobile-dev-tools/`. An interactive TUI is coming next.
+Required tools are added automatically (Node.js brings nvm, CocoaPods brings Homebrew). A failed tool does not stop the rest; the summary lists it and the log is in `~/Library/Logs/mobile-dev-tools/`. 
+Run `mdt` with no arguments in a terminal for the interactive mode. It checks the Mac, lets you start from a profile, toggle tools, review the exact commands, watch live progress and read a summary with next steps. Keys: `space` toggle, `a` select all, `/` filter, `enter` continue, `esc` back, `?` help, `q` quit. It asks for your admin password once before installing. The TUI has only been exercised with a fake runner and up to the review screen on a real Mac; no real install has been run through it yet.
 
 # Contributing
 

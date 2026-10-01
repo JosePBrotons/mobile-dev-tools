@@ -71,7 +71,13 @@ internal/shellenv/  idempotent edits to ~/.zprofile
 - A failed tool does not stop the rest; it is reported at the end.
 - Exit criteria: `mdt install --profile <x>` reaches parity with each legacy script.
 
-## Phase 3: Bubble Tea TUI
+## Phase 3: Bubble Tea TUI (done)
+
+Shipped: `mdt` with no arguments (or `mdt tui`) opens the TUI when stdin and stdout are terminals. `internal/tui` has all six screens below on Bubble Tea v1. Engine changes it needed: `runner.Exec` takes an optional `Stdin` (nil in the TUI so it keeps the terminal) and `runner.SudoValidate` caches the admin password through `tea.ExecProcess`; `plan.Build` splits resolution from detection, `plan.Rows` and `plan.Notes` feed the review screen, `plan.NextSteps` and the catalog `next_steps` field feed the summary; `internal/sysinfo` powers the welcome screen; detection runs eight checks at a time. On other systems than macOS the TUI works as a preview and refuses to install.
+
+Deferred: no real install has been run through the TUI yet (tests use the fake runner, and a real Mac run stopped at the review screen). Cancelling mid-install kills the running step and the rest fail fast, it does not stop cleanly between tools.
+
+Original plan:
 
 Screens, in order:
 
