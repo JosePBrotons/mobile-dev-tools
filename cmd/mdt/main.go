@@ -54,7 +54,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	a := &app{
-		runner: runner.Exec{},
+		runner: runner.Exec{Stdin: os.Stdin},
 		home:   home,
 		goos:   runtime.GOOS,
 		now:    time.Now,
