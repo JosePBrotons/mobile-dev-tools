@@ -4,7 +4,7 @@ Conventions for anyone (human or AI agent) changing this repo. `CLAUDE.md` impor
 
 ## Project overview
 
-Installs mobile and Java development tools on macOS. Today it is a set of bash scripts driven by `mobile-dev-tools.sh -rn|-flutter|-java`. The plan is a Go + Bubble Tea TUI (`mdt`) where the user picks what to install. Read [ROADMAP.md](ROADMAP.md) before starting larger work and keep it updated when a phase changes.
+Installs mobile and Java development tools on macOS. Today it is a set of bash scripts driven by `mobile-dev-tools.sh -rn|-flutter|-java|-web`. The plan is a Go + Bubble Tea TUI (`mdt`) where the user picks what to install. Read [ROADMAP.md](ROADMAP.md) before starting larger work and keep it updated when a phase changes.
 
 ## Repo map
 
@@ -14,14 +14,18 @@ React Native/react-native-dev-tools.sh
 React Native/mobile-global-modules.sh   npm globals + ngrok, sourced by the RN profile
 Flutter/flutter-dev-tools.sh
 Java/java-dev-tools.sh
+Web/web-dev-tools.sh
 Misc/install-command-line-tools.sh  Xcode CLT (skips if present)
 Misc/install-brew.sh                Homebrew (skips if present, loads shellenv)
 Misc/brew-helpers.sh                brew_formula / brew_cask helpers, one brew update
 Misc/set-android-home-path.sh       ANDROID_HOME in ~/.zprofile (idempotent)
+go.mod                              Go module
+catalog/tools.yaml, catalog/embed.go  tool catalog and its go:embed
+internal/catalog/                   loader and validator for the catalog
 ROADMAP.md                          plan for the TUI
 ```
 
-Planned Go layout (Phase 2+): `cmd/mdt/`, `internal/{catalog,detect,plan,runner,shellenv,tui}/`, `catalog/tools.yaml`.
+Planned Go layout (Phase 2+): `cmd/mdt/`, `internal/{detect,plan,runner,shellenv,tui}/`, `catalog/tools.yaml`.
 
 ## Shell conventions
 
@@ -37,7 +41,8 @@ Planned Go layout (Phase 2+): `cmd/mdt/`, `internal/{catalog,detect,plan,runner,
 
 - Format with `gofmt`, lint with `golangci-lint`, test with `go test ./...`.
 - Only `internal/runner` executes commands. Everything else takes a `Runner` interface so tests can use a fake.
-- New tools are added to `catalog/tools.yaml`, not hardcoded in Go.
+- New tools are added to `catalog/tools.yaml`, not hardcoded in Go. `go:embed` cannot reach parent folders, so the embed lives in `catalog/embed.go`.
+- Until Phase 6, a tool added to the catalog must also be added to the legacy script for its profiles. `TestProfilesMatchLegacyScripts` checks this.
 - Prefer table-driven tests. Tests must never touch the real home folder; use `t.TempDir()`.
 - TUI code (`internal/tui`) holds no install logic; it calls `internal/plan` and `internal/runner`.
 
@@ -54,7 +59,7 @@ Agent sandboxes and CI runners are usually Linux, so the install scripts cannot 
 
 ```
 for f in mobile-dev-tools.sh */*.sh; do bash -n "$f"; done
-shellcheck -x -e SC1091 mobile-dev-tools.sh Misc/*.sh Java/*.sh Flutter/*.sh "React Native"/*.sh
+shellcheck -x -e SC1091 mobile-dev-tools.sh Misc/*.sh Java/*.sh Flutter/*.sh Web/*.sh "React Native"/*.sh
 ```
 
 Both must pass with no output. For Go code, also run `go test ./...` and `mdt install --dry-run --profile <x>`. Say in your summary that scripts were statically checked only, unless they were run on macOS.

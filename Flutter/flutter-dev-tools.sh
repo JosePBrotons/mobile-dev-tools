@@ -3,6 +3,10 @@ echo "Welcome, this script will install the dependencies and libraries that will
 source ./Misc/install-command-line-tools.sh
 source ./Misc/install-brew.sh
 source ./Misc/brew-helpers.sh
+echo "Installing Git..."
+brew_formula git
+echo "Installing GitHub CLI..."
+brew_formula gh
 echo "Installing iTerm2..."
 brew_cask iterm2
 echo "Installing Postman..."

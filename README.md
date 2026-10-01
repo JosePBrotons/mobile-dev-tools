@@ -8,12 +8,14 @@ Scripts that install on macOS the tools needed to develop in Java and to build m
 
 - [Xcode Command Line Tools](https://developer.apple.com/xcode/resources/)
 - [Homebrew Package Manager](https://brew.sh/)
+- [Git](https://git-scm.com/)
+- [GitHub CLI](https://cli.github.com/)
 - [iTerm2 Terminal Emulator](https://iterm2.com/)
 - [Postman for API Development](https://www.postman.com/)
 - [Visual Studio Code Editor](https://code.visualstudio.com/)
 - [nvm - Node Version Manager](https://github.com/nvm-sh/nvm)
 - [Node.js LTS](https://nodejs.org/en/)
-- [Yarn Package Manager v4 (via Corepack)](https://yarnpkg.com/)
+- [pnpm Package Manager](https://pnpm.io/)
 - [Flutter](https://flutter.dev)
 - [Facebook's Watchman - A File Watching Service](https://facebook.github.io/watchman/)
 - [CocoaPods - Dependency Manager for Swift and Objective-C](https://cocoapods.org/)
@@ -23,6 +25,12 @@ Scripts that install on macOS the tools needed to develop in Java and to build m
 - [Fastlane - App automation](https://fastlane.tools/)
 - [TypeScript - Globally (via npm)](https://www.typescriptlang.org/)
 - [ngrok - Secure introspectable tunnel to localhost (via Homebrew)](https://ngrok.com/)
+- [Bun](https://bun.sh/)
+- [mkcert - Local HTTPS certificates](https://github.com/FiloSottile/mkcert)
+- [OrbStack - Docker and Linux on macOS](https://orbstack.dev/)
+- [Firefox Developer Edition](https://www.mozilla.org/firefox/developer/)
+- [Brave Browser](https://brave.com/)
+- [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium)
 - [Maven](https://maven.apache.org/)
 - [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 
@@ -39,6 +47,7 @@ Then run the script with `bash` (from any directory):
     $ bash mobile-dev-tools.sh -rn (React Native)
     $ bash mobile-dev-tools.sh -flutter (Flutter)
     $ bash mobile-dev-tools.sh -java (Java)
+    $ bash mobile-dev-tools.sh -web (Web)
 
 Running it again is safe: tools that are already installed are skipped.
 
@@ -46,6 +55,7 @@ To keep in mind:
 
 - Installing [Xcode](https://developer.apple.com/xcode/) **requires being signed in with an Apple ID already inside the App Store App.**
 - Some steps use `sudo`, so you may be asked for your admin password.
+- The web profile runs `mkcert -install`, which asks for your admin password. OrbStack is free for personal use only.
 - `ANDROID_HOME` is added to `~/.zprofile`. Open a new terminal after the script finishes so it takes effect.
 
 # Contributing

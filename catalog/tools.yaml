@@ -1,0 +1,337 @@
+# Catalog of installable tools. Parsed and validated by internal/catalog.
+# Add new tools here, not in Go code. Keep in sync with the legacy scripts until Phase 6.
+
+categories:
+  - {id: system, name: System}
+  - {id: terminals-editors, name: Terminals and editors}
+  - {id: runtimes, name: Runtimes}
+  - {id: mobile-sdks, name: Mobile SDKs}
+  - {id: web, name: Web}
+  - {id: browsers, name: Browsers}
+  - {id: build-release, name: Build and release}
+  - {id: clis, name: CLIs}
+
+profiles:
+  - {id: rn, name: React Native}
+  - {id: flutter, name: Flutter}
+  - {id: java, name: Java}
+  - {id: web, name: Web}
+
+tools:
+  - id: xcode-clt
+    name: Xcode Command Line Tools
+    description: Compilers and git that macOS developer tools depend on
+    category: system
+    profiles: [rn, flutter, java, web]
+    method: script
+    install: [xcode-select --install]
+    check: xcode-select -p
+    url: https://developer.apple.com/xcode/resources/
+    notes: [Opens a macOS dialog that must be confirmed]
+
+  - id: homebrew
+    name: Homebrew
+    description: Package manager for macOS
+    category: system
+    profiles: [rn, flutter, java, web]
+    method: script
+    install: ['/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
+    check: command -v brew
+    requires: [xcode-clt]
+    url: https://brew.sh/
+    notes: [May ask for the admin password]
+
+  - id: git
+    name: Git
+    description: Version control, newer than the copy Apple ships
+    category: clis
+    profiles: [rn, flutter, java, web]
+    method: brew
+    package: git
+    check: command -v git
+    requires: [homebrew]
+    url: https://git-scm.com/
+
+  - id: gh
+    name: GitHub CLI
+    description: Work with pull requests and issues from the terminal
+    category: clis
+    profiles: [rn, flutter, java, web]
+    method: brew
+    package: gh
+    check: command -v gh
+    requires: [homebrew]
+    url: https://cli.github.com/
+
+  - id: iterm2
+    name: iTerm2
+    description: Terminal emulator
+    category: terminals-editors
+    profiles: [rn, flutter, web]
+    method: cask
+    package: iterm2
+    check: test -d /Applications/iTerm.app
+    requires: [homebrew]
+    url: https://iterm2.com/
+
+  - id: postman
+    name: Postman
+    description: API development and testing
+    category: terminals-editors
+    profiles: [rn, flutter, web]
+    method: cask
+    package: postman
+    check: test -d /Applications/Postman.app
+    requires: [homebrew]
+    url: https://www.postman.com/
+
+  - id: vscode
+    name: Visual Studio Code
+    description: Code editor
+    category: terminals-editors
+    profiles: [rn, flutter, web]
+    method: cask
+    package: visual-studio-code
+    check: test -d "/Applications/Visual Studio Code.app"
+    requires: [homebrew]
+    url: https://code.visualstudio.com/
+
+  - id: nvm
+    name: nvm
+    description: Node version manager
+    category: runtimes
+    profiles: [rn, web]
+    method: script
+    install: ['curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash']
+    check: test -s "$HOME/.nvm/nvm.sh"
+    url: https://github.com/nvm-sh/nvm
+
+  - id: node
+    name: Node.js LTS
+    description: JavaScript runtime, latest LTS release via nvm
+    category: runtimes
+    profiles: [rn, web]
+    method: script
+    install:
+      - nvm install --lts
+      - nvm use --lts
+      - nvm alias default 'lts/*'
+    check: command -v node
+    requires: [nvm]
+    url: https://nodejs.org/
+
+  - id: pnpm
+    name: pnpm
+    description: Fast, disk-efficient package manager
+    category: web
+    profiles: [rn, web]
+    method: brew
+    package: pnpm
+    check: command -v pnpm
+    requires: [homebrew]
+    url: https://pnpm.io/
+
+  - id: bun
+    name: Bun
+    description: JavaScript runtime, bundler and package manager
+    category: web
+    profiles: [web]
+    method: brew
+    package: bun
+    check: command -v bun
+    requires: [homebrew]
+    url: https://bun.sh/
+
+  - id: typescript
+    name: TypeScript
+    description: Typed JavaScript compiler, installed globally with npm
+    category: web
+    profiles: [rn, web]
+    method: script
+    install: [npm install -g typescript]
+    check: command -v tsc
+    requires: [node]
+    url: https://www.typescriptlang.org/
+
+  - id: ngrok
+    name: ngrok
+    description: Secure tunnel to localhost
+    category: web
+    profiles: [rn, web]
+    method: cask
+    package: ngrok
+    check: command -v ngrok
+    requires: [homebrew]
+    url: https://ngrok.com/
+
+  - id: mkcert
+    name: mkcert
+    description: Locally trusted HTTPS certificates for dev servers
+    category: web
+    profiles: [web]
+    method: brew
+    package: mkcert
+    check: command -v mkcert
+    requires: [homebrew]
+    post_install: [mkcert-install]
+    url: https://github.com/FiloSottile/mkcert
+    notes: [Trusting the local CA asks for the admin password]
+
+  - id: orbstack
+    name: OrbStack
+    description: Fast Docker and Linux runtime for macOS
+    category: web
+    profiles: [web]
+    method: cask
+    package: orbstack
+    check: test -d /Applications/OrbStack.app
+    requires: [homebrew]
+    url: https://orbstack.dev/
+    notes: [Free for personal use only]
+
+  - id: firefox-dev
+    name: Firefox Developer Edition
+    description: Browser for cross-browser testing
+    category: browsers
+    profiles: [web]
+    method: cask
+    package: firefox@developer-edition
+    check: test -d "/Applications/Firefox Developer Edition.app"
+    requires: [homebrew]
+    url: https://www.mozilla.org/firefox/developer/
+
+  - id: brave
+    name: Brave
+    description: Chromium based browser
+    category: browsers
+    profiles: [web]
+    method: cask
+    package: brave-browser
+    check: test -d "/Applications/Brave Browser.app"
+    requires: [homebrew]
+    url: https://brave.com/
+
+  - id: ungoogled-chromium
+    name: ungoogled-chromium
+    description: Chromium without Google services
+    category: browsers
+    profiles: [web]
+    method: cask
+    package: ungoogled-chromium
+    check: test -d /Applications/Chromium.app
+    requires: [homebrew]
+    url: https://github.com/ungoogled-software/ungoogled-chromium
+    notes: [Unsigned build, macOS may block the first launch]
+
+  - id: watchman
+    name: Watchman
+    description: File watching service used by Metro
+    category: mobile-sdks
+    profiles: [rn]
+    method: brew
+    package: watchman
+    check: command -v watchman
+    requires: [homebrew]
+    url: https://facebook.github.io/watchman/
+
+  - id: cocoapods
+    name: CocoaPods
+    description: Dependency manager for iOS projects
+    category: mobile-sdks
+    profiles: [rn, flutter]
+    method: brew
+    package: cocoapods
+    check: command -v pod
+    requires: [homebrew]
+    url: https://cocoapods.org/
+
+  - id: jdk
+    name: JDK 17 (Azul Zulu)
+    description: Java Development Kit
+    category: runtimes
+    profiles: [rn, flutter, java]
+    method: cask
+    package: zulu@17
+    check: /usr/libexec/java_home -v 17
+    requires: [homebrew]
+    url: https://www.azul.com/downloads/
+
+  - id: android-studio
+    name: Android Studio
+    description: Android IDE and SDK manager
+    category: mobile-sdks
+    profiles: [rn, flutter]
+    method: cask
+    package: android-studio
+    check: test -d "/Applications/Android Studio.app"
+    requires: [homebrew]
+    post_install: [android-home-env]
+    url: https://developer.android.com/studio/
+    notes: [Large download]
+
+  - id: flutter
+    name: Flutter
+    description: Flutter SDK
+    category: mobile-sdks
+    profiles: [flutter]
+    method: cask
+    package: flutter
+    check: command -v flutter
+    requires: [homebrew]
+    url: https://flutter.dev/
+
+  - id: mas
+    name: mas
+    description: Mac App Store command line client
+    category: clis
+    profiles: [rn, flutter]
+    method: brew
+    package: mas
+    check: command -v mas
+    requires: [homebrew]
+    url: https://github.com/mas-cli/mas
+
+  - id: xcode
+    name: Xcode
+    description: Apple IDE, iOS simulators and SDKs
+    category: mobile-sdks
+    profiles: [rn, flutter]
+    method: mas
+    package: "497799835"
+    check: test -d /Applications/Xcode.app
+    requires: [mas]
+    url: https://developer.apple.com/xcode/
+    notes: [Requires being signed in to the App Store, Large download]
+
+  - id: fastlane
+    name: Fastlane
+    description: App build and release automation
+    category: build-release
+    profiles: [rn, flutter]
+    method: brew
+    package: fastlane
+    check: command -v fastlane
+    requires: [homebrew]
+    url: https://fastlane.tools/
+
+  - id: intellij-idea
+    name: IntelliJ IDEA
+    description: Java IDE
+    category: terminals-editors
+    profiles: [java]
+    method: cask
+    package: intellij-idea
+    check: test -d "/Applications/IntelliJ IDEA.app"
+    requires: [homebrew]
+    url: https://www.jetbrains.com/idea/
+
+  - id: maven
+    name: Maven
+    description: Java build tool
+    category: build-release
+    profiles: [java]
+    method: brew
+    package: maven
+    check: command -v mvn
+    requires: [homebrew]
+    url: https://maven.apache.org/

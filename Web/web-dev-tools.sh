@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo "Welcome, this script will install the dependencies and libraries that will help you throughout React Native's mobile development"
+echo "Welcome, this script will install the dependencies and libraries that will help you throughout web development"
 source ./Misc/install-command-line-tools.sh
 source ./Misc/install-brew.sh
 source ./Misc/brew-helpers.sh
@@ -24,20 +24,18 @@ nvm use --lts
 nvm alias default 'lts/*'
 echo "Installing pnpm..."
 brew_formula pnpm
-echo "Check for Android Home Path"
-source ./Misc/set-android-home-path.sh
-echo "Installing Facebook's Watchman..."
-brew_formula watchman
-echo "Installing CocoaPods..."
-brew_formula cocoapods
-echo "Installing Java Development Kit (JDK)..."
-brew_cask zulu@17
-echo "Installing Android Studio..."
-brew_cask android-studio
-echo "Installing Mac App Store CLI..."
-brew_formula mas
-echo "Installing Xcode by using the M.A.S CLI (requires being signed in to the App Store)..."
-mas install 497799835
-echo "Installing Fastlane for app automation..."
-brew_formula fastlane
+echo "Installing Bun..."
+brew_formula bun
+echo "Installing mkcert..."
+brew_formula mkcert
+echo "Trusting the mkcert local CA (may ask for your admin password)..."
+mkcert -install
+echo "Installing OrbStack..."
+brew_cask orbstack
+echo "Installing Firefox Developer Edition..."
+brew_cask firefox@developer-edition
+echo "Installing Brave..."
+brew_cask brave-browser
+echo "Installing ungoogled-chromium..."
+brew_cask ungoogled-chromium
 source "./React Native/mobile-global-modules.sh"
