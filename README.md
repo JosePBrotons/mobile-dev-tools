@@ -35,7 +35,7 @@ Scripts that install on macOS the tools needed to develop in Java and to build m
 - [Maven](https://maven.apache.org/)
 - [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 
-Google Chrome is in the `mdt` catalog too but belongs to no profile, so it is never preselected: pick it in the TUI or with `mdt install --only chrome`.
+These optional tools are in the `mdt` catalog but belong to no profile, so they are never preselected: Google Chrome, Zed, Warp, Cursor, Google Antigravity, and the Claude, ChatGPT and Gemini desktop apps (Gemini needs Apple silicon and macOS 15 or newer). Pick them in the TUI or with `mdt install --only chrome,zed,claude`.
 
 Jest is no longer installed globally: React Native projects ship it as a project dependency.
 

@@ -4,6 +4,7 @@
 categories:
   - {id: system, name: System}
   - {id: terminals-editors, name: Terminals and editors}
+  - {id: ai-tools, name: AI tools}
   - {id: runtimes, name: Runtimes}
   - {id: mobile-sdks, name: Mobile SDKs}
   - {id: web, name: Web}
@@ -74,6 +75,62 @@ tools:
     requires: [homebrew]
     url: https://iterm2.com/
 
+  - id: zed
+    name: Zed
+    description: Fast multiplayer code editor
+    category: terminals-editors
+    profiles: []
+    method: cask
+    package: zed
+    check: test -d "/Applications/Zed.app"
+    requires: [homebrew]
+    url: https://zed.dev/
+
+  - id: warp
+    name: Warp
+    description: Terminal with built-in AI and command blocks
+    category: terminals-editors
+    profiles: []
+    method: cask
+    package: warp
+    check: test -d "/Applications/Warp.app"
+    requires: [homebrew]
+    url: https://www.warp.dev/terminal
+
+  - id: claude
+    name: Claude
+    description: Anthropic's Claude desktop app
+    category: ai-tools
+    profiles: []
+    method: cask
+    package: claude
+    check: test -d "/Applications/Claude.app"
+    requires: [homebrew]
+    url: https://claude.com/download
+
+  - id: chatgpt
+    name: ChatGPT
+    description: OpenAI's ChatGPT desktop app
+    category: ai-tools
+    profiles: []
+    method: cask
+    package: chatgpt
+    check: test -d "/Applications/ChatGPT.app"
+    requires: [homebrew]
+    url: https://chatgpt.com/
+
+  - id: gemini
+    name: Gemini
+    description: Google's Gemini desktop app
+    category: ai-tools
+    profiles: []
+    method: cask
+    package: google-gemini
+    check: test -d "/Applications/Gemini.app"
+    requires: [homebrew]
+    url: https://gemini.google/
+    notes: [Needs Apple silicon and macOS 15 or newer]
+
   - id: postman
     name: Postman
     description: API development and testing
@@ -106,6 +163,28 @@ tools:
     check: test -d "/Applications/Visual Studio Code.app"
     requires: [homebrew]
     url: https://code.visualstudio.com/
+
+  - id: cursor
+    name: Cursor
+    description: VS Code based editor with AI built in
+    category: terminals-editors
+    profiles: []
+    method: cask
+    package: cursor
+    check: test -d "/Applications/Cursor.app"
+    requires: [homebrew]
+    url: https://www.cursor.com/
+
+  - id: antigravity
+    name: Google Antigravity
+    description: Agent-first IDE from Google
+    category: terminals-editors
+    profiles: []
+    method: cask
+    package: antigravity
+    check: test -d "/Applications/Antigravity.app"
+    requires: [homebrew]
+    url: https://antigravity.google/
 
   - id: nvm
     name: nvm
