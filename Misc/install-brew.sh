@@ -11,3 +11,10 @@ else
         eval "$(/usr/local/bin/brew shellenv)"
     fi
 fi
+# Load Homebrew in new terminals (same line as the mdt brew-shellenv hook).
+if ! grep -q "brew shellenv" "$HOME/.zprofile" 2>/dev/null; then
+    echo "Adding Homebrew to ~/.zprofile..."
+    cat >> "$HOME/.zprofile" <<'EOF'
+if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
+EOF
+fi

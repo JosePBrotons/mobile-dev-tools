@@ -10,7 +10,7 @@ import (
 var idPattern = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 
 // KnownPostInstall lists the hooks internal/plan implements.
-var KnownPostInstall = []string{"android-home-env", "mkcert-install"}
+var KnownPostInstall = []string{"android-home-env", "brew-shellenv", "mkcert-install"}
 
 // Validate reports every problem found, joined into one error.
 func (c *Catalog) Validate() error {
@@ -72,6 +72,9 @@ func (c *Catalog) Validate() error {
 			}
 		default:
 			add("tool %q: unknown method %q", t.ID, t.Method)
+		}
+		if len(t.Uninstall) > 0 && t.Method != MethodScript {
+			add("tool %q: uninstall is only for method script", t.ID)
 		}
 		for _, r := range t.Requires {
 			if !ids[r] {

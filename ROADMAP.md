@@ -90,12 +90,14 @@ Screens, in order:
 
 Keys: `space` toggle, `a` select all, `/` filter, `enter` continue, `esc` back, `?` help.
 
-## Phase 4: Updates and maintenance
+## Phase 4: Updates and maintenance (done)
 
-- `mdt doctor` (done): `mdt doctor [--profile <id> | --only a,b]` runs each tool's check and verifies the profile edits (Homebrew shellenv and nvm loading, `ANDROID_HOME` lines and SDK folder), printing a fix for each problem. Exit 1 when problems are found. Deferred: the mkcert hook is not verified. Found a gap: nothing writes `brew shellenv` to `~/.zprofile`, so a fresh Mac may not find `brew` in new terminals; fix it with a `post_install` hook later.
-- `mdt upgrade`: wrap `brew outdated` / `brew upgrade` for catalog tools and bump Node to the latest LTS via nvm.
-- Optional `mdt uninstall <id>`.
-- A recurring catalog refresh checklist: JDK level required by React Native and the Android Gradle Plugin, latest nvm release, deprecated casks, Xcode install method.
+- `mdt doctor` (done): `mdt doctor [--profile <id> | --only a,b]` runs each tool's check and verifies the profile edits (Homebrew shellenv and nvm loading, `ANDROID_HOME` lines and SDK folder, mkcert CA trust), printing a fix for each problem. Exit 1 when problems are found. The gap it found is closed: a `brew-shellenv` `post_install` hook on the Homebrew tool writes one arch-agnostic line to `~/.zprofile` (skipped when a `brew shellenv` line is already there), in `mdt install` and in `Misc/install-brew.sh`.
+- `mdt upgrade` (done): `mdt upgrade [--profile <id> | --only a,b] [--dry-run] [--yes]` runs `brew update` and `brew outdated --json=v2`, matches the result to catalog packages, and upgrades them; Node.js moves to the latest LTS through nvm with `--reinstall-packages-from=default`. Pinned formulae are listed and skipped. Deferred: Xcode (mas), nvm itself and other script tools are not upgraded, and `--greedy` casks are not included because those apps update themselves.
+- `mdt uninstall` (done): `mdt uninstall <id>... [--dry-run] [--yes]` removes brew and cask tools, plus script tools that have an `uninstall` list in the catalog (TypeScript). It refuses tools that an installed tool still requires, mas tools and script tools without an uninstall, and says why. A hook can have an `undo` (`mkcert -uninstall`). Profile lines are not edited; the summary lists them. Deferred: removing nvm, Node.js and the Android SDK folder.
+- Catalog refresh checklist (done): [docs/catalog-refresh.md](docs/catalog-refresh.md), with `go test ./internal/catalog -run TestUpstream -upstream` to check every package against Homebrew for missing, deprecated or disabled entries.
+
+None of these have been run for real on a Mac beyond dry runs: `upgrade --dry-run`, `uninstall --dry-run` and the upstream test.
 
 ## Phase 5: Distribution and CI
 

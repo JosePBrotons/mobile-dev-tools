@@ -52,6 +52,9 @@ tools:
 		{"unknown hook", `
 tools:
   - {id: a, name: A, description: d, category: system, method: brew, package: a, post_install: [x]}`, "unknown post_install hook"},
+		{"uninstall on brew", `
+tools:
+  - {id: a, name: A, description: d, category: system, method: brew, package: a, uninstall: [x]}`, "uninstall is only for method script"},
 		{"bad id", `
 tools:
   - {id: Bad_ID, name: A, description: d, category: system, method: brew, package: a}`, "kebab-case"},

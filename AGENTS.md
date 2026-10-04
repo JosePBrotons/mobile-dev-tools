@@ -27,9 +27,12 @@ internal/shellenv/                  prelude for every step, idempotent ~/.zprofi
 internal/detect/                    runs each tool's check
 internal/doctor/                    read-only environment checks for mdt doctor
 internal/plan/                      resolve, dry-run output, execute with progress events
+internal/upgrade/                   finds outdated brew tools and a newer Node LTS, runs the upgrades
+internal/uninstall/                 removal plan with refusals, runs the uninstalls
 internal/sysinfo/                   macOS version, arch, free disk for the welcome screen
 internal/tui/                       Bubble Tea TUI (no install logic)
-cmd/mdt/                            CLI: mdt (TUI), mdt install, mdt doctor, mdt list
+cmd/mdt/                            CLI: mdt (TUI), mdt install, mdt doctor, mdt upgrade, mdt uninstall, mdt list
+docs/catalog-refresh.md             checklist for reviewing the catalog
 ROADMAP.md                          plan for the TUI
 ```
 
@@ -49,7 +52,8 @@ ROADMAP.md                          plan for the TUI
 - Only `internal/runner` executes commands. Everything else takes a `Runner` interface so tests can use a fake.
 - New tools are added to `catalog/tools.yaml`, not hardcoded in Go. `go:embed` cannot reach parent folders, so the embed lives in `catalog/embed.go`.
 - Until Phase 6, a tool added to the catalog must also be added to the legacy script for its profiles. `TestProfilesMatchLegacyScripts` and `TestCommandsMatchLegacyScripts` check this.
-- A new `post_install` hook goes in `catalog.KnownPostInstall` and in the `hooks` table in `internal/plan`.
+- A new `post_install` hook goes in `catalog.KnownPostInstall` and in the `hooks` table in `internal/plan`. Give it an `undo` command if `mdt uninstall` should reverse it.
+- A script tool that `mdt uninstall` can remove needs an `uninstall` list in the catalog. Without it, the tool is refused.
 - The dry-run golden file lives in `internal/plan/testdata/`. After an intended change, run `go test ./internal/plan -update` and review the diff.
 - Prefer table-driven tests. Tests must never touch the real home folder; use `t.TempDir()`.
 - TUI code (`internal/tui`) holds no install logic; it calls `internal/plan` and `internal/runner`.
@@ -60,6 +64,8 @@ ROADMAP.md                          plan for the TUI
 2. Add it to every relevant profile script using the helpers (later: one entry in `catalog/tools.yaml`).
 3. Update the tool list in `README.md`.
 4. Run the checks below.
+
+To review the whole catalog for stale pins and deprecated packages, follow [docs/catalog-refresh.md](docs/catalog-refresh.md).
 
 ## Verification
 

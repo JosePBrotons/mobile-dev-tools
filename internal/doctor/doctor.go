@@ -23,8 +23,6 @@ import (
 type Options struct {
 	// Home is the user's home folder.
 	Home string
-	// Arch is runtime.GOARCH; it picks the Homebrew prefix in fixes.
-	Arch string
 	// IDs limits the check to these tools and their dependencies, and
 	// reports missing ones as problems. Nil checks installed tools only.
 	IDs []string
@@ -95,7 +93,7 @@ func Run(ctx context.Context, c *catalog.Catalog, r runner.Runner, opts Options)
 		var err error
 		switch t.ID {
 		case "homebrew":
-			f, err = checkBrew(zprofile, opts.Arch)
+			f, err = checkBrew(zprofile)
 		case "nvm":
 			f, err = checkNVM(zprofile, zshrc)
 		}
@@ -103,7 +101,9 @@ func Run(ctx context.Context, c *catalog.Catalog, r runner.Runner, opts Options)
 			return rep, err
 		}
 		rep.Env = append(rep.Env, f...)
-		// mkcert-install has no cheap read-only check, so it is not verified.
+		if slices.Contains(t.PostInstall, "mkcert-install") {
+			rep.Env = append(rep.Env, checkMkcert(ctx, r))
+		}
 		if slices.Contains(t.PostInstall, "android-home-env") {
 			f, err = checkAndroid(opts.Home, zprofile)
 			if err != nil {
@@ -115,18 +115,26 @@ func Run(ctx context.Context, c *catalog.Catalog, r runner.Runner, opts Options)
 	return rep, nil
 }
 
-func checkBrew(zprofile, arch string) ([]Finding, error) {
+// mkcertTrusted looks for the mkcert root in the system keychain. It only reads.
+const mkcertTrusted = "security find-certificate -c mkcert /Library/Keychains/System.keychain"
+
+func checkMkcert(ctx context.Context, r runner.Runner) Finding {
+	f := Finding{Name: "mkcert local CA is trusted", OK: true}
+	if err := r.Run(ctx, mkcertTrusted, io.Discard); err != nil {
+		f.OK = false
+		f.Fix = "mkcert -install"
+	}
+	return f
+}
+
+func checkBrew(zprofile string) ([]Finding, error) {
 	ok, err := shellenv.Contains(zprofile, "brew shellenv")
 	if err != nil {
 		return nil, err
 	}
 	f := Finding{Name: "Homebrew is loaded by ~/" + shellenv.ProfileFile, OK: ok}
 	if !ok {
-		prefix := "/usr/local"
-		if arch == "arm64" {
-			prefix = "/opt/homebrew"
-		}
-		f.Fix = fmt.Sprintf(`echo 'eval "$(%s/bin/brew shellenv)"' >> ~/%s`, prefix, shellenv.ProfileFile)
+		f.Fix = fmt.Sprintf(`echo '%s' >> ~/%s`, shellenv.BrewShellenvLine, shellenv.ProfileFile)
 	}
 	return []Finding{f}, nil
 }

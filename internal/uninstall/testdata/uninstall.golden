@@ -1,0 +1,9 @@
+Uninstall: 3 of 6 tools
+
+  STATUS   TOOL           COMMANDS
+  refused  Xcode          remove it by hand (see https://developer.apple.com/xcode/)
+  remove   Google Chrome  brew uninstall --cask google-chrome
+  remove   mkcert         mkcert -uninstall && brew uninstall mkcert
+  remove   TypeScript     npm uninstall -g typescript
+  refused  nvm            needed by Node.js LTS
+  refused  GitHub CLI     not installed
