@@ -159,3 +159,39 @@ func TestNextSteps(t *testing.T) {
 		t.Fatalf("got %v, want none", got)
 	}
 }
+
+func TestExecuteBrewShellenvHook(t *testing.T) {
+	brew := catalog.Tool{ID: "homebrew", Name: "Homebrew", Method: catalog.MethodScript,
+		Install: []string{"true"}, PostInstall: []string{"brew-shellenv"}}
+	tests := []struct {
+		name    string
+		profile string
+		want    string
+	}{
+		{"missing profile", "", shellenv.BrewShellenvLine + "\n"},
+		{"added once", shellenv.BrewShellenvLine + "\n", shellenv.BrewShellenvLine + "\n"},
+		{"hand written line", "eval \"$(/opt/homebrew/bin/brew shellenv)\"\n", "eval \"$(/opt/homebrew/bin/brew shellenv)\"\n"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			home := t.TempDir()
+			path := filepath.Join(home, ".zprofile")
+			if tt.profile != "" {
+				if err := os.WriteFile(path, []byte(tt.profile), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			p := &Plan{Items: []Item{{Tool: brew, Installed: true}}}
+			if report := Execute(context.Background(), p, &runner.Fake{}, Options{Home: home}, nil); report.Failed() {
+				t.Fatalf("report: %+v", report)
+			}
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(data) != tt.want {
+				t.Fatalf(".zprofile = %q, want %q", data, tt.want)
+			}
+		})
+	}
+}

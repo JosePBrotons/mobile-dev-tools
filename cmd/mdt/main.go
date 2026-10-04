@@ -46,7 +46,6 @@ type app struct {
 	runner runner.Runner
 	home   string
 	goos   string
-	arch   string
 	now    func() time.Time
 	stdin  io.Reader
 	stdout io.Writer
@@ -69,7 +68,6 @@ func main() {
 		runner: runner.Exec{Stdin: os.Stdin},
 		home:   home,
 		goos:   runtime.GOOS,
-		arch:   runtime.GOARCH,
 		now:    time.Now,
 		stdin:  os.Stdin,
 		stdout: os.Stdout,
@@ -239,7 +237,7 @@ func (a *app) doctor(ctx context.Context, args []string) error {
 		ids = append(ids, t.ID)
 	}
 	say(a.stderr, "Checking tools...\n")
-	rep, err := doctor.Run(ctx, c, a.runner, doctor.Options{Home: a.home, Arch: a.arch, IDs: ids})
+	rep, err := doctor.Run(ctx, c, a.runner, doctor.Options{Home: a.home, IDs: ids})
 	if err != nil {
 		return err
 	}

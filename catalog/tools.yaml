@@ -39,6 +39,7 @@ tools:
     install: ['/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
     check: command -v brew
     requires: [xcode-clt]
+    post_install: [brew-shellenv]
     url: https://brew.sh/
     notes: [May ask for the admin password]
 

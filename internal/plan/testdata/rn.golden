@@ -2,7 +2,7 @@ Plan: 20 tools, 17 to install, 3 already installed
 
   STATUS     TOOL                      COMMANDS
   installed  Xcode Command Line Tools
-  installed  Homebrew
+  installed  Homebrew                  load Homebrew in ~/.zprofile
   installed  Git
   install    (Homebrew update)         brew update
   install    GitHub CLI                brew install gh

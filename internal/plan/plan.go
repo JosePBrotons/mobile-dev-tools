@@ -46,11 +46,18 @@ type Plan struct {
 type hook struct {
 	command string
 	lines   []string
+	// skipIf is a substring of the profile that means the edit is already
+	// done, even by hand. Empty means only the first line is checked.
+	skipIf string
+	// edit describes the profile change for the plan. Empty quotes the
+	// first line.
+	edit string
 }
 
 var hooks = map[string]hook{
 	"mkcert-install":   {command: "mkcert -install"},
 	"android-home-env": {lines: shellenv.AndroidHomeLines},
+	"brew-shellenv":    {lines: []string{shellenv.BrewShellenvLine}, skipIf: "brew shellenv", edit: "load Homebrew"},
 }
 
 // New resolves ids against the catalog and detects what is installed.
@@ -187,8 +194,13 @@ func Commands(t catalog.Tool) []string {
 func profileEdits(t catalog.Tool) []string {
 	var out []string
 	for _, h := range t.PostInstall {
-		if lines := hooks[h].lines; len(lines) > 0 {
-			out = append(out, fmt.Sprintf("add %q to ~/%s", lines[0], shellenv.ProfileFile))
+		hk := hooks[h]
+		switch {
+		case len(hk.lines) == 0:
+		case hk.edit != "":
+			out = append(out, fmt.Sprintf("%s in ~/%s", hk.edit, shellenv.ProfileFile))
+		default:
+			out = append(out, fmt.Sprintf("add %q to ~/%s", hk.lines[0], shellenv.ProfileFile))
 		}
 	}
 	return out

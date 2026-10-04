@@ -29,6 +29,11 @@ var AndroidHomeLines = []string{
 	`export PATH=$PATH:$ANDROID_HOME/platform-tools`,
 }
 
+// BrewShellenvLine loads Homebrew in new terminals on either prefix. It
+// matches Misc/install-brew.sh.
+const BrewShellenvLine = `if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"; ` +
+	`elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi`
+
 // EnsureLines appends lines to path unless its first line is already there.
 // The file is created if missing. It reports whether the file changed.
 func EnsureLines(path string, lines []string) (bool, error) {

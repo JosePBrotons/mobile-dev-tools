@@ -148,6 +148,15 @@ func applyEdits(it Item, opts Options) error {
 			continue
 		}
 		path := filepath.Join(opts.Home, shellenv.ProfileFile)
+		if skip := hooks[h].skipIf; skip != "" {
+			done, err := shellenv.Contains(path, skip)
+			if err != nil {
+				return fmt.Errorf("%s: %w", h, err)
+			}
+			if done {
+				continue
+			}
+		}
 		changed, err := shellenv.EnsureLines(path, lines)
 		if err != nil {
 			return fmt.Errorf("%s: %w", h, err)
