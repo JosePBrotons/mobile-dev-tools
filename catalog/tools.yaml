@@ -1,5 +1,5 @@
 # Catalog of installable tools. Parsed and validated by internal/catalog.
-# Add new tools here, not in Go code. Keep in sync with the legacy scripts until Phase 6.
+# Add new tools here, not in Go code.
 
 categories:
   - {id: system, name: System}

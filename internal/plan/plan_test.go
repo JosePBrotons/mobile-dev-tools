@@ -7,7 +7,6 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -195,82 +194,6 @@ func TestPrintGolden(t *testing.T) {
 	}
 	if buf.String() != string(want) {
 		t.Fatalf("dry run output changed (go test ./internal/plan -update to accept):\n%s", buf.String())
-	}
-}
-
-// Legacy entry scripts per profile. Remove with the scripts in Phase 6.
-var legacyScripts = map[string]string{
-	"rn":      "React Native/react-native-dev-tools.sh",
-	"flutter": "Flutter/flutter-dev-tools.sh",
-	"java":    "Java/java-dev-tools.sh",
-	"web":     "Web/web-dev-tools.sh",
-}
-
-var (
-	sourceLine = regexp.MustCompile(`(?m)^\s*source\s+(.+)$`)
-	pkgLine    = regexp.MustCompile(`(?m)^\s*(brew_formula|brew_cask|mas install)\s+(\S+)\s*$`)
-)
-
-// readLegacy returns a script and every script it sources, concatenated.
-func readLegacy(t *testing.T, rel string, seen map[string]bool) string {
-	t.Helper()
-	if seen[rel] {
-		return ""
-	}
-	seen[rel] = true
-	data, err := os.ReadFile(filepath.Join("..", "..", rel))
-	if err != nil {
-		t.Fatal(err)
-	}
-	text := string(data)
-	for _, m := range sourceLine.FindAllStringSubmatch(text, -1) {
-		path := strings.Trim(strings.ReplaceAll(strings.TrimSpace(m[1]), `\ `, " "), `"`)
-		text += readLegacy(t, strings.TrimPrefix(path, "./"), seen)
-	}
-	return text
-}
-
-// Exit criteria for Phase 2: mdt installs what each legacy script installs.
-func TestCommandsMatchLegacyScripts(t *testing.T) {
-	c := load(t)
-	kind := map[string]catalog.Method{
-		"brew_formula": catalog.MethodBrew, "brew_cask": catalog.MethodCask, "mas install": catalog.MethodMas,
-	}
-	for profile, script := range legacyScripts {
-		t.Run(profile, func(t *testing.T) {
-			text := readLegacy(t, script, map[string]bool{})
-			var want []string
-			for _, m := range pkgLine.FindAllStringSubmatch(text, -1) {
-				want = append(want, string(kind[m[1]])+":"+m[2])
-			}
-			items, err := Resolve(c, profileIDs(c, profile))
-			if err != nil {
-				t.Fatal(err)
-			}
-			var got []string
-			for _, it := range items {
-				tool := it.Tool
-				if tool.Method == catalog.MethodScript {
-					continue
-				}
-				got = append(got, string(tool.Method)+":"+tool.Package)
-			}
-			slices.Sort(got)
-			slices.Sort(want)
-			if !slices.Equal(got, want) {
-				t.Fatalf("packages differ:\n got %v\nwant %v", got, want)
-			}
-			// Script installs and hook commands must appear verbatim in the legacy scripts.
-			for _, it := range items {
-				for _, cmd := range Commands(it.Tool) {
-					if it.Tool.Method == catalog.MethodScript || !strings.HasPrefix(cmd, "brew install") && !strings.HasPrefix(cmd, "mas install") {
-						if !strings.Contains(text, cmd) {
-							t.Errorf("%s: %q is not in the legacy script", it.Tool.ID, cmd)
-						}
-					}
-				}
-			}
-		})
 	}
 }
 
