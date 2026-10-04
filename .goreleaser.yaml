@@ -41,7 +41,7 @@ homebrew_casks:
     repository:
       owner: JosePBrotons
       name: homebrew-tap
-      token: '{{ index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}'
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
     homepage: https://github.com/JosePBrotons/mobile-dev-tools
     description: Installs mobile and Java development tools on macOS
     skip_upload: '{{ if index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}false{{ else }}true{{ end }}'
