@@ -99,19 +99,19 @@ Keys: `space` toggle, `a` select all, `/` filter, `enter` continue, `esc` back, 
 
 None of these have been run for real on a Mac beyond dry runs: `upgrade --dry-run`, `uninstall --dry-run` and the upstream test.
 
-## Phase 5: Distribution and CI
+## Phase 5: Distribution and CI (done)
 
-- GoReleaser builds a universal darwin binary on each tag.
-- Homebrew tap: `brew install josepbrotons/tap/mdt`.
-- `install.sh` bootstrap that downloads the right binary on a Mac without Homebrew.
-- GitHub Actions: `go test ./...`, `golangci-lint`, `shellcheck` on the legacy scripts, and a `macos-latest` job running `mdt install --dry-run` for every profile.
+Shipped: `.goreleaser.yaml` builds a universal darwin binary on each `v*` tag (`.github/workflows/release.yml`), with `checksums.txt` and a Homebrew cask pushed to `JosePBrotons/homebrew-tap`. `install.sh` downloads the latest release, verifies the checksum and installs to `~/.local/bin`. `mdt version` reports the release. CI (`.github/workflows/ci.yml`) runs gofmt, `go vet`, `go test`, `golangci-lint`, shellcheck, and a `macos-latest` job that dry-runs every profile plus `upgrade` and `uninstall`.
+
+Before the first release: create the `JosePBrotons/homebrew-tap` repo and add the `HOMEBREW_TAP_GITHUB_TOKEN` secret (see AGENTS.md, Releasing). The binary is not signed or notarized; the cask clears the quarantine flag, and `install.sh` downloads with curl, which does not set it. Not yet run for real: no release has been cut, and only GoReleaser snapshots and `install.sh` against a local copy were tried.
 
 ## Phase 6: Retire the legacy scripts
 
-Once Phase 2 reaches parity, move the scripts to `legacy/` with a deprecation note in the README, then remove them in a later release.
+Step 1 (done): the scripts moved to `legacy/` with a deprecation notice, and the parity tests were removed, so the catalog no longer has to match them. Step 2: delete `legacy/` in a later release, once `mdt` has run on a real Mac.
 
-## Open questions
+## Decisions
 
-- Install Xcode with `mas` (needs App Store sign-in) or [`xcodes`](https://github.com/XcodesOrg/xcodes) (supports multiple versions)?
-- Should Ruby be managed (rbenv) for CocoaPods and Fastlane, or keep the Homebrew formulas?
-- Install Android SDK components (platforms, build tools, emulator images) with `sdkmanager` instead of relying on Android Studio's first-run wizard?
+- **Xcode:** `mas` stays in the rn and flutter profiles. `xcodes` is an optional tool for people who need several versions; its sign-in prompts do not fit the TUI well.
+- **Ruby:** CocoaPods and Fastlane stay on their Homebrew formulas. No rbenv; projects that pin a Ruby use bundler.
+- **Android SDK:** the `android-sdk` tool installs components with `sdkmanager` after the user accepts the licenses. It is the first `interactive` tool: it runs last with the terminal attached (`tea.ExecProcess` in the TUI). Platform `android-36` and build tools `36.0.0` are pinned; Gradle downloads anything else a project needs. Removing the SDK folder is not part of `mdt uninstall`.
+- **Homebrew tap:** added next to `install.sh`. A fresh Mac has no Homebrew, so `install.sh` stays the main path; the tap serves people who already have it and gives them `brew upgrade mdt`.
