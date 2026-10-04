@@ -59,7 +59,7 @@ To keep in mind:
 - Installing [Xcode](https://developer.apple.com/xcode/) **requires being signed in with an Apple ID already inside the App Store App.**
 - Some steps use `sudo`, so you may be asked for your admin password.
 - The web profile runs `mkcert -install`, which asks for your admin password. OrbStack is free for personal use only.
-- `ANDROID_HOME` is added to `~/.zprofile`. Open a new terminal after the script finishes so it takes effect.
+- Homebrew (`brew shellenv`) and `ANDROID_HOME` are added to `~/.zprofile`. Open a new terminal after the script finishes so they take effect.
 
 # mdt (preview)
 
@@ -72,6 +72,15 @@ To keep in mind:
     $ go run ./cmd/mdt install --profile rn --dry-run        (show the plan only)
     $ go run ./cmd/mdt install --profile rn                  (asks before installing)
     $ go run ./cmd/mdt install --only node,watchman --yes    (pick tools, no prompt)
+    $ go run ./cmd/mdt upgrade --dry-run                     (show what is outdated)
+    $ go run ./cmd/mdt upgrade --only node,gh                (upgrade just those, asks first)
+    $ go run ./cmd/mdt uninstall chrome typescript --dry-run (show what would be removed)
+
+`mdt doctor` also checks that Homebrew is loaded by `~/.zprofile` and that the mkcert local CA is trusted, and prints a fix for each problem.
+
+`mdt upgrade` runs `brew update`, then upgrades the catalog tools that `brew outdated` lists, and moves Node.js to the latest LTS through nvm (global npm packages such as TypeScript are kept). Without `--profile` or `--only` it checks every installed catalog tool and leaves other Homebrew packages alone. Casks that update themselves (Chrome, VS Code and similar) do not show up as outdated, and pinned formulae are listed but skipped. Xcode, nvm and other script installs are not upgraded.
+
+`mdt uninstall <id>...` removes tools through Homebrew, plus `npm uninstall -g` for TypeScript, and undoes `mkcert -install` first. It refuses what it cannot undo safely: tools that another installed tool needs, Xcode, and script installs without an automatic removal (Homebrew, Xcode Command Line Tools, nvm, Node.js). The refusal says why and where to remove them by hand. Lines added to `~/.zprofile` are not removed; the summary lists them.
 
 Required tools are added automatically (Node.js brings nvm, CocoaPods brings Homebrew). A failed tool does not stop the rest; the summary lists it and the log is in `~/Library/Logs/mobile-dev-tools/`. 
 Run `mdt` with no arguments in a terminal for the interactive mode. It checks the Mac, lets you start from a profile, toggle tools, review the exact commands, watch live progress and read a summary with next steps. Keys: `space` toggle, `a` select all, `/` filter, `enter` continue, `esc` back, `?` help, `q` quit. It asks for your admin password once before installing. The TUI has only been exercised with a fake runner and up to the review screen on a real Mac; no real install has been run through it yet.
