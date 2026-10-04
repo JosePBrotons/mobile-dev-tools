@@ -316,3 +316,17 @@ func TestUninstall(t *testing.T) {
 		})
 	}
 }
+
+func TestVersion(t *testing.T) {
+	for _, arg := range []string{"version", "--version", "-v"} {
+		t.Run(arg, func(t *testing.T) {
+			a, _, stdout, _ := newApp(t, "linux", "")
+			if code := a.run(context.Background(), []string{arg}); code != 0 {
+				t.Fatalf("exit code %d", code)
+			}
+			if got, want := stdout.String(), "mdt "+version+"\n"; got != want {
+				t.Errorf("output %q, want %q", got, want)
+			}
+		})
+	}
+}
