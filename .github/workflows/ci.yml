@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: gofmt
+        run: test -z "$(gofmt -l .)"
+      - run: go vet ./...
+      - run: go test ./...
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: |
+          for f in install.sh legacy/mobile-dev-tools.sh legacy/*/*.sh; do bash -n "$f"; done
+      - name: shellcheck
+        run: shellcheck -x -e SC1091 install.sh legacy/*.sh legacy/*/*.sh
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go build -o mdt ./cmd/mdt
+      - run: ./mdt version
+      - run: ./mdt list
+      - name: Dry run every profile
+        run: |
+          for profile in rn flutter java web; do
+            ./mdt install --dry-run --profile "$profile"
+          done
+      - run: ./mdt upgrade --dry-run --only git
+      - run: ./mdt uninstall chrome --dry-run
