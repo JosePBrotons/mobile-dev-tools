@@ -46,6 +46,10 @@ func TestUsageErrors(t *testing.T) {
 		{[]string{"install", "--only", "node,nope"}, `unknown tool "nope"`},
 		{[]string{"install", "--only", "node", "extra"}, `unexpected argument "extra"`},
 		{[]string{"install", "--nope"}, "flag provided but not defined"},
+		{[]string{"doctor", "--profile", "rn", "--only", "node"}, "at most one of --profile or --only"},
+		{[]string{"doctor", "--profile", "ios"}, `unknown profile "ios"`},
+		{[]string{"doctor", "--only", "nope"}, `unknown tool "nope"`},
+		{[]string{"doctor", "extra"}, `unexpected argument "extra"`},
 	}
 	for _, tt := range tests {
 		t.Run(strings.Join(tt.args, " "), func(t *testing.T) {
@@ -180,6 +184,30 @@ func TestNoArgsStartsTUIOnTerminal(t *testing.T) {
 			a.tui = func(context.Context) (bool, error) { started = true; return tt.failed, nil }
 			if code := a.run(context.Background(), nil); code != tt.wantCode || !started {
 				t.Fatalf("exit %d started %v", code, started)
+			}
+		})
+	}
+}
+
+func TestDoctorExitCodes(t *testing.T) {
+	tests := []struct {
+		name     string
+		args     []string
+		fail     []string
+		wantCode int
+		wantOut  string
+	}{
+		{"missing tool", []string{"doctor", "--only", "cocoapods"}, []string{"command -v pod"}, 1, "mdt install --only cocoapods"},
+		{"default mode hides missing", []string{"doctor"}, []string{"command -v pod", "brew", "nvm.sh", "Android Studio.app"}, 0, "No problems found"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a, _, stdout, _ := newApp(t, "linux", "", tt.fail...)
+			if code := a.run(context.Background(), tt.args); code != tt.wantCode {
+				t.Fatalf("exit %d, want %d\n%s", code, tt.wantCode, stdout)
+			}
+			if !strings.Contains(stdout.String(), tt.wantOut) {
+				t.Fatalf("stdout does not contain %q:\n%s", tt.wantOut, stdout)
 			}
 		})
 	}

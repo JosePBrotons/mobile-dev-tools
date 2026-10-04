@@ -20,6 +20,7 @@ import (
 	"golang.org/x/term"
 
 	"github.com/josepbrotons/mobile-dev-tools/internal/catalog"
+	"github.com/josepbrotons/mobile-dev-tools/internal/doctor"
 	"github.com/josepbrotons/mobile-dev-tools/internal/plan"
 	"github.com/josepbrotons/mobile-dev-tools/internal/runner"
 	"github.com/josepbrotons/mobile-dev-tools/internal/tui"
@@ -29,6 +30,7 @@ const usage = `Usage:
   mdt                  interactive mode (needs a terminal)
   mdt tui              same as above
   mdt install (--profile <id> | --only <id,id,...>) [--dry-run] [--yes]
+  mdt doctor [--profile <id> | --only <id,id,...>]
   mdt list
 
 Run "mdt list" to see profiles and tool ids.
@@ -44,6 +46,7 @@ type app struct {
 	runner runner.Runner
 	home   string
 	goos   string
+	arch   string
 	now    func() time.Time
 	stdin  io.Reader
 	stdout io.Writer
@@ -66,6 +69,7 @@ func main() {
 		runner: runner.Exec{Stdin: os.Stdin},
 		home:   home,
 		goos:   runtime.GOOS,
+		arch:   runtime.GOARCH,
 		now:    time.Now,
 		stdin:  os.Stdin,
 		stdout: os.Stdout,
@@ -93,6 +97,8 @@ func (a *app) run(ctx context.Context, args []string) int {
 		err = a.interactive(ctx)
 	case "install":
 		err = a.install(ctx, args[1:])
+	case "doctor":
+		err = a.doctor(ctx, args[1:])
 	case "list":
 		err = a.list()
 	case "help", "-h", "--help":
@@ -121,14 +127,23 @@ type installFlags struct {
 }
 
 func parseInstall(args []string, c *catalog.Catalog) (installFlags, error) {
+	return parseSelection("install", args, c, true)
+}
+
+// parseSelection parses --profile, --only and, for install, --dry-run and
+// --yes. With required set, exactly one of --profile and --only is needed;
+// otherwise at most one.
+func parseSelection(name string, args []string, c *catalog.Catalog, required bool) (installFlags, error) {
 	var f installFlags
 	var only string
-	fs := flag.NewFlagSet("install", flag.ContinueOnError)
+	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
-	fs.StringVar(&f.profile, "profile", "", "profile to install")
+	fs.StringVar(&f.profile, "profile", "", "profile to check or install")
 	fs.StringVar(&only, "only", "", "comma separated tool ids")
-	fs.BoolVar(&f.dryRun, "dry-run", false, "print the plan without installing")
-	fs.BoolVar(&f.yes, "yes", false, "do not ask for confirmation")
+	if required {
+		fs.BoolVar(&f.dryRun, "dry-run", false, "print the plan without installing")
+		fs.BoolVar(&f.yes, "yes", false, "do not ask for confirmation")
+	}
 	if err := fs.Parse(args); err != nil {
 		return f, fmt.Errorf("%w: %v", errUsage, err)
 	}
@@ -140,8 +155,13 @@ func parseInstall(args []string, c *catalog.Catalog) (installFlags, error) {
 			f.only = append(f.only, id)
 		}
 	}
-	if (f.profile == "") == (len(f.only) == 0) {
-		return f, fmt.Errorf("%w: use exactly one of --profile or --only", errUsage)
+	both := f.profile != "" && len(f.only) > 0
+	neither := f.profile == "" && len(f.only) == 0
+	if both || (required && neither) {
+		if required {
+			return f, fmt.Errorf("%w: use exactly one of --profile or --only", errUsage)
+		}
+		return f, fmt.Errorf("%w: use at most one of --profile or --only", errUsage)
 	}
 	if f.profile != "" && !slices.ContainsFunc(c.Profiles, func(p catalog.Profile) bool { return p.ID == f.profile }) {
 		return f, fmt.Errorf("%w: unknown profile %q", errUsage, f.profile)
@@ -201,6 +221,33 @@ func (a *app) install(ctx context.Context, args []string) error {
 	a.printSummary(p, report, logPath)
 	if report.Failed() {
 		return errors.New("some tools failed to install")
+	}
+	return nil
+}
+
+func (a *app) doctor(ctx context.Context, args []string) error {
+	c, err := catalog.Load()
+	if err != nil {
+		return err
+	}
+	f, err := parseSelection("doctor", args, c, false)
+	if err != nil {
+		return err
+	}
+	ids := f.only
+	for _, t := range c.ForProfile(f.profile) {
+		ids = append(ids, t.ID)
+	}
+	say(a.stderr, "Checking tools...\n")
+	rep, err := doctor.Run(ctx, c, a.runner, doctor.Options{Home: a.home, Arch: a.arch, IDs: ids})
+	if err != nil {
+		return err
+	}
+	if err := rep.Print(a.stdout); err != nil {
+		return err
+	}
+	if n := rep.Problems(); n > 0 {
+		return fmt.Errorf("%d problems found", n)
 	}
 	return nil
 }

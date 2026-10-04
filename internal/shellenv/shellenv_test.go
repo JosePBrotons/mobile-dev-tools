@@ -50,3 +50,23 @@ func TestEnsureLines(t *testing.T) {
 }
 
 func ptr(s string) *string { return &s }
+
+func TestContains(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, ".zshrc")
+	if got, err := Contains(path, "NVM_DIR"); err != nil || got {
+		t.Fatalf("missing file: got %v, err %v", got, err)
+	}
+	if err := os.WriteFile(path, []byte("export NVM_DIR=\"$HOME/.nvm\"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		substr string
+		want   bool
+	}{{"NVM_DIR", true}, {"brew shellenv", false}}
+	for _, tt := range tests {
+		if got, err := Contains(path, tt.substr); err != nil || got != tt.want {
+			t.Fatalf("Contains(%q) = %v, %v; want %v", tt.substr, got, err, tt.want)
+		}
+	}
+}
