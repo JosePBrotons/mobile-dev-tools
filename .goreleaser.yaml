@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+version: 2
+
+project_name: mdt
+
+builds:
+  - id: mdt
+    main: ./cmd/mdt
+    binary: mdt
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+universal_binaries:
+  - ids: [mdt]
+    replace: true
+
+archives:
+  - id: mdt
+    formats: [tar.gz]
+    name_template: "mdt_{{ .Version }}_darwin_all"
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github
+  sort: asc
+
+# The binary is not signed or notarized, so clear the quarantine flag or
+# Gatekeeper blocks it after "brew install". Set HOMEBREW_TAP_GITHUB_TOKEN to
+# publish the cask; without it the release still succeeds and skips the tap.
+homebrew_casks:
+  - name: mdt
+    repository:
+      owner: JosePBrotons
+      name: homebrew-tap
+      token: '{{ index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}'
+    homepage: https://github.com/JosePBrotons/mobile-dev-tools
+    description: Installs mobile and Java development tools on macOS
+    skip_upload: '{{ if index .Env "HOMEBREW_TAP_GITHUB_TOKEN" }}false{{ else }}true{{ end }}'
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr",
+                           args: ["-dr", "com.apple.quarantine", "#{staged_path}/mdt"]
+          end
