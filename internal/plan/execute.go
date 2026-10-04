@@ -70,6 +70,10 @@ type Options struct {
 	Home string
 	// Log receives every command's output. Nil discards it.
 	Log io.Writer
+	// Interactive runs the script of an interactive tool. Nil uses the
+	// runner, which suits the CLI where stdin is the terminal; the TUI sets
+	// it to hand the terminal over for the step.
+	Interactive func(ctx context.Context, script string, log io.Writer) error
 }
 
 // Execute installs the pending tools in order. A failed tool does not stop
@@ -114,7 +118,11 @@ func Execute(ctx context.Context, p *Plan, r runner.Runner, opts Options, emit f
 		} else {
 			logf(opts.Log, "==> Installing %s...\n", t.Name)
 			script := shellenv.Prelude + strings.Join(Commands(t), " &&\n")
-			err = r.Run(ctx, script, opts.Log)
+			if t.Interactive && opts.Interactive != nil {
+				err = opts.Interactive(ctx, script, opts.Log)
+			} else {
+				err = r.Run(ctx, script, opts.Log)
+			}
 			res.Status = StatusInstalled
 		}
 		if err == nil {

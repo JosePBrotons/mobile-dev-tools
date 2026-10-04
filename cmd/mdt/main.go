@@ -36,9 +36,13 @@ const usage = `Usage:
   mdt upgrade [--profile <id> | --only <id,id,...>] [--dry-run] [--yes]
   mdt uninstall <id>... [--dry-run] [--yes]
   mdt list
+  mdt version
 
 Run "mdt list" to see profiles and tool ids.
 `
+
+// version is set at release time with -ldflags "-X main.version=...".
+var version = "dev"
 
 // LogDir is where install logs go, relative to the home folder.
 const LogDir = "Library/Logs/mobile-dev-tools"
@@ -107,6 +111,8 @@ func (a *app) run(ctx context.Context, args []string) int {
 		err = a.uninstall(ctx, args[1:])
 	case "list":
 		err = a.list()
+	case "version", "-v", "--version":
+		say(a.stdout, "mdt %s\n", version)
 	case "help", "-h", "--help":
 		say(a.stdout, "%s", usage)
 		return 0
@@ -411,7 +417,8 @@ func (a *app) runTUI(ctx context.Context) (bool, error) {
 			path, f, err := a.openLog()
 			return path, f, err
 		},
-		SudoCmd: runner.SudoValidate,
+		SudoCmd:        runner.SudoValidate,
+		InteractiveCmd: runner.Command,
 	})
 }
 

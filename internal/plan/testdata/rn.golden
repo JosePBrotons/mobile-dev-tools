@@ -1,29 +1,33 @@
-Plan: 20 tools, 17 to install, 3 already installed
+Plan: 22 tools, 19 to install, 3 already installed
 
-  STATUS     TOOL                      COMMANDS
+  STATUS     TOOL                        COMMANDS
   installed  Xcode Command Line Tools
-  installed  Homebrew                  load Homebrew in ~/.zprofile
+  installed  Homebrew                    load Homebrew in ~/.zprofile
   installed  Git
-  install    (Homebrew update)         brew update
-  install    GitHub CLI                brew install gh
-  install    iTerm2                    brew install --cask iterm2
-  install    Postman                   brew install --cask postman
-  install    RapidAPI                  brew install --cask rapidapi
-  install    Visual Studio Code        brew install --cask visual-studio-code
-  install    nvm                       curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
-  install    Node.js LTS               nvm install --lts && nvm use --lts && nvm alias default 'lts/*'
-  install    pnpm                      brew install pnpm
-  install    TypeScript                npm install -g typescript
-  install    ngrok                     brew install --cask ngrok
-  install    Watchman                  brew install watchman
-  install    CocoaPods                 brew install cocoapods
-  install    JDK 17 (Azul Zulu)        brew install --cask zulu@17
-  install    Android Studio            brew install --cask android-studio && add "export ANDROID_HOME=$HOME/Library/Android/sdk" to ~/.zprofile
-  install    mas                       brew install mas
-  install    Xcode                     mas install 497799835
-  install    Fastlane                  brew install fastlane
+  install    (Homebrew update)           brew update
+  install    GitHub CLI                  brew install gh
+  install    iTerm2                      brew install --cask iterm2
+  install    Postman                     brew install --cask postman
+  install    RapidAPI                    brew install --cask rapidapi
+  install    Visual Studio Code          brew install --cask visual-studio-code
+  install    nvm                         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.8/install.sh | bash
+  install    Node.js LTS                 nvm install --lts && nvm use --lts && nvm alias default 'lts/*'
+  install    pnpm                        brew install pnpm
+  install    TypeScript                  npm install -g typescript
+  install    ngrok                       brew install --cask ngrok
+  install    Watchman                    brew install watchman
+  install    CocoaPods                   brew install cocoapods
+  install    JDK 17 (Azul Zulu)          brew install --cask zulu@17
+  install    Android Studio              brew install --cask android-studio && add "export ANDROID_HOME=$HOME/Library/Android/sdk" to ~/.zprofile
+  install    Android command line tools  brew install --cask android-commandlinetools
+  install    mas                         brew install mas
+  install    Xcode                       mas install 497799835
+  install    Fastlane                    brew install fastlane
+  install    Android SDK components      export JAVA_HOME="$(/usr/libexec/java_home -v 17)" && sdkmanager --sdk_root="$HOME/Library/Android/sdk" --licenses && sdkmanager --sdk_root="$HOME/Library/Android/sdk" "platform-tools" "emulator" "platforms;android-36" "build-tools;36.0.0" && add "export ANDROID_HOME=$HOME/Library/Android/sdk" to ~/.zprofile
 
 Notes:
   Android Studio: Large download
   Xcode: Requires being signed in to the App Store
   Xcode: Large download
+  Android SDK components: Asks you to review and accept the Android SDK licenses
+  Android SDK components: Large download

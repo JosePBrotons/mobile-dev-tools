@@ -44,7 +44,11 @@ type Tool struct {
 	Install     []string `yaml:"install"`
 	// Uninstall removes a script tool. Brew, cask and mas tools are removed
 	// from their package, so only script tools may set it.
-	Uninstall   []string `yaml:"uninstall"`
+	Uninstall []string `yaml:"uninstall"`
+	// Interactive marks a script tool that asks the user questions (such as
+	// accepting licenses). It runs last with the terminal attached, so no
+	// other tool may require it.
+	Interactive bool     `yaml:"interactive"`
 	Check       string   `yaml:"check"`
 	Requires    []string `yaml:"requires"`
 	PostInstall []string `yaml:"post_install"`

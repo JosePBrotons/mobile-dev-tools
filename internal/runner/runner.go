@@ -27,6 +27,13 @@ func SudoValidate() *exec.Cmd {
 	return exec.Command("sudo", "-v")
 }
 
+// Command returns a command that runs script with /bin/bash and the terminal
+// attached, for steps that ask the user questions. A TUI hands it to
+// tea.ExecProcess.
+func Command(script string) *exec.Cmd {
+	return exec.Command("/bin/bash", "-c", script)
+}
+
 // Run implements Runner.
 func (e Exec) Run(ctx context.Context, script string, out io.Writer) error {
 	cmd := exec.CommandContext(ctx, "/bin/bash", "-c", script)

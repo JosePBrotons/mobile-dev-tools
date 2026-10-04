@@ -20,12 +20,21 @@ const (
 	sudoKeepAlive = time.Minute
 )
 
+// execProcess hands the terminal to a command. Tests replace it.
+var execProcess = tea.ExecProcess
+
 type (
 	eventMsg plan.Event
 	logMsg   string
 	doneMsg  struct{ report plan.Report }
 	// sudoMsg reports the result of caching the admin password.
 	sudoMsg struct{ err error }
+	// interactiveMsg asks the UI to run a step with the terminal attached
+	// and to send the result on done.
+	interactiveMsg struct {
+		script string
+		done   chan<- error
+	}
 )
 
 type progressState struct {
@@ -86,6 +95,18 @@ func (m Model) runInstall() (tea.Model, tea.Cmd) {
 
 	p, r, opts := m.plan, m.cfg.Runner, plan.Options{Home: m.cfg.Home, Log: io.MultiWriter(chanWriter(send), logFile)}
 	keepSudo := m.cfg.SudoCmd != nil
+	if m.cfg.InteractiveCmd != nil {
+		opts.Interactive = func(ctx context.Context, script string, _ io.Writer) error {
+			done := make(chan error, 1)
+			send(interactiveMsg{script: script, done: done})
+			select {
+			case err := <-done:
+				return err
+			case <-ctx.Done():
+				return ctx.Err()
+			}
+		}
+	}
 	go func() {
 		stop := make(chan struct{})
 		if keepSudo {
@@ -134,6 +155,13 @@ func (m Model) updateProgress(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		return m.runInstall()
+	case interactiveMsg:
+		m.prog.appendLog("(this step runs in the terminal and asks for your input)\n")
+		run := execProcess(m.cfg.InteractiveCmd(msg.script), func(err error) tea.Msg {
+			msg.done <- err
+			return nil
+		})
+		return m, tea.Batch(run, waitMsg(m.prog.ch))
 	case eventMsg:
 		res := msg.Result
 		if msg.Kind == plan.Started {

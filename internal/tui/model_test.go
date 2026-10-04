@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -216,5 +217,36 @@ func TestAppendLog(t *testing.T) {
 	want := []string{"hello world", "50%", "100%"}
 	if strings.Join(p.lines, "|") != strings.Join(want, "|") || p.partial != "last" {
 		t.Fatalf("lines %q partial %q", p.lines, p.partial)
+	}
+}
+
+// Interactive tools run through the terminal hand-over instead of the runner.
+func TestInteractiveStepUsesTerminal(t *testing.T) {
+	var scripts []string
+	execProcess = func(c *exec.Cmd, fn tea.ExecCallback) tea.Cmd {
+		return func() tea.Msg { return fn(nil) }
+	}
+	t.Cleanup(func() { execProcess = tea.ExecProcess })
+
+	fake := &runner.Fake{Fail: map[string]error{"platform-tools\"": errors.New("exit 1")}}
+	m := newModel(t, fake, "darwin")
+	m.cfg.InteractiveCmd = func(script string) *exec.Cmd {
+		scripts = append(scripts, script)
+		return exec.Command("true")
+	}
+	m = drain(t, m, func() tea.Msg { return m.Init()().(tea.BatchMsg)[1]() })
+	m = press(t, m, "enter", "enter") // rn profile
+	m = press(t, m, "enter")          // review
+	m = press(t, m, "enter")          // start
+	if m.screen != screenSummary || m.Failed() {
+		t.Fatalf("screen %v failed %v notice %q", m.screen, m.Failed(), m.notice)
+	}
+	if len(scripts) != 1 || !strings.Contains(scripts[0], "sdkmanager") {
+		t.Fatalf("interactive scripts = %v", scripts)
+	}
+	for _, c := range fake.Calls() {
+		if strings.Contains(c, "sdkmanager --sdk_root") {
+			t.Fatalf("interactive script ran through the runner: %s", c)
+		}
 	}
 }

@@ -2,6 +2,8 @@
 # Run from the repo root so the relative `source` paths in each script resolve.
 cd "$(dirname "$0")" || exit 1
 
+echo "These scripts are deprecated and frozen. Use mdt instead: https://github.com/JosePBrotons/mobile-dev-tools#mdt" >&2
+
 if [[ $1 = "-rn" ]]; then
     echo "Installing React Native Dev Tools"
     source ./React\ Native/react-native-dev-tools.sh
@@ -19,5 +21,5 @@ else
     echo "-rn for React Native"
     echo "-flutter for Flutter"
     echo "-java for Java"
-echo "-web for Web"
+    echo "-web for Web"
 fi

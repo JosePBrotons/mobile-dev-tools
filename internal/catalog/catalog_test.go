@@ -1,7 +1,6 @@
 package catalog
 
 import (
-	"slices"
 	"strings"
 	"testing"
 )
@@ -55,6 +54,13 @@ tools:
 		{"uninstall on brew", `
 tools:
   - {id: a, name: A, description: d, category: system, method: brew, package: a, uninstall: [x]}`, "uninstall is only for method script"},
+		{"interactive on brew", `
+tools:
+  - {id: a, name: A, description: d, category: system, method: brew, package: a, interactive: true}`, "interactive is only for method script"},
+		{"requires interactive", `
+tools:
+  - {id: a, name: A, description: d, category: system, method: script, install: [x], interactive: true}
+  - {id: b, name: B, description: d, category: system, method: brew, package: b, requires: [a]}`, "cannot require interactive tool"},
 		{"bad id", `
 tools:
   - {id: Bad_ID, name: A, description: d, category: system, method: brew, package: a}`, "kebab-case"},
@@ -71,37 +77,6 @@ tools:
 			_, err := Parse([]byte(header + tt.tools))
 			if err == nil || !strings.Contains(err.Error(), tt.want) {
 				t.Fatalf("got %v, want error containing %q", err, tt.want)
-			}
-		})
-	}
-}
-
-// ids the legacy scripts install, per profile. Update together with the scripts.
-var legacy = map[string][]string{
-	"rn": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "rapidapi", "vscode", "nvm", "node", "pnpm",
-		"watchman", "cocoapods", "jdk", "android-studio", "mas", "xcode", "fastlane", "typescript", "ngrok"},
-	"flutter": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "rapidapi", "vscode", "cocoapods", "jdk",
-		"android-studio", "flutter", "mas", "xcode", "fastlane"},
-	"java": {"xcode-clt", "homebrew", "git", "gh", "jdk", "intellij-idea", "maven"},
-	"web": {"xcode-clt", "homebrew", "git", "gh", "iterm2", "postman", "rapidapi", "vscode", "nvm", "node", "pnpm", "bun",
-		"mkcert", "orbstack", "firefox-dev", "brave", "ungoogled-chromium", "typescript", "ngrok"},
-}
-
-func TestProfilesMatchLegacyScripts(t *testing.T) {
-	c, err := Load()
-	if err != nil {
-		t.Fatal(err)
-	}
-	for profile, want := range legacy {
-		t.Run(profile, func(t *testing.T) {
-			var got []string
-			for _, tool := range c.ForProfile(profile) {
-				got = append(got, tool.ID)
-			}
-			slices.Sort(got)
-			want := slices.Sorted(slices.Values(want))
-			if !slices.Equal(got, want) {
-				t.Fatalf("profile %s:\n got %v\nwant %v", profile, got, want)
 			}
 		})
 	}
