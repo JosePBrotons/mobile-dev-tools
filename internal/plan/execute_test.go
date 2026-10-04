@@ -3,6 +3,7 @@ package plan
 import (
 	"context"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -193,5 +194,68 @@ func TestExecuteBrewShellenvHook(t *testing.T) {
 				t.Fatalf(".zprofile = %q, want %q", data, tt.want)
 			}
 		})
+	}
+}
+
+func TestExecuteInteractive(t *testing.T) {
+	sdk := tool("sdk", catalog.MethodScript)
+	sdk.Interactive = true
+	tests := []struct {
+		name       string
+		hook       bool
+		wantRunner int
+		wantHook   int
+		hookErr    error
+		wantStatus Status
+	}{
+		{"hook runs the step", true, 0, 1, nil, StatusInstalled},
+		{"hook failure fails the tool", true, 0, 1, errors.New("declined"), StatusFailed},
+		{"no hook uses the runner", false, 1, 0, nil, StatusInstalled},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fake := &runner.Fake{}
+			opts := Options{Home: t.TempDir()}
+			hooked := 0
+			if tt.hook {
+				opts.Interactive = func(_ context.Context, script string, _ io.Writer) error {
+					hooked++
+					if !strings.HasPrefix(script, shellenv.Prelude) || !strings.Contains(script, "install-sdk") {
+						t.Errorf("unexpected script %q", script)
+					}
+					return tt.hookErr
+				}
+			}
+			report := Execute(context.Background(), &Plan{Items: []Item{{Tool: sdk}}}, fake, opts, nil)
+			if got := report.Results[0].Status; got != tt.wantStatus {
+				t.Errorf("status %s, want %s", got, tt.wantStatus)
+			}
+			if hooked != tt.wantHook || len(fake.Calls()) != tt.wantRunner {
+				t.Errorf("hook ran %d times, runner %d", hooked, len(fake.Calls()))
+			}
+		})
+	}
+}
+
+func TestResolveInteractiveLast(t *testing.T) {
+	c := load(t)
+	for _, profile := range []string{"rn", "flutter"} {
+		items, err := Resolve(c, profileIDs(c, profile))
+		if err != nil {
+			t.Fatal(err)
+		}
+		last := items[len(items)-1].Tool
+		if last.ID != "android-sdk" || !last.Interactive {
+			t.Errorf("%s: last tool is %s, want android-sdk", profile, last.ID)
+		}
+		seen := map[string]bool{}
+		for _, it := range items {
+			for _, r := range it.Tool.Requires {
+				if !seen[r] {
+					t.Errorf("%s: %s comes before its dependency %s", profile, it.Tool.ID, r)
+				}
+			}
+			seen[it.Tool.ID] = true
+		}
 	}
 }

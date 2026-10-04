@@ -76,6 +76,9 @@ func (c *Catalog) Validate() error {
 		if len(t.Uninstall) > 0 && t.Method != MethodScript {
 			add("tool %q: uninstall is only for method script", t.ID)
 		}
+		if t.Interactive && t.Method != MethodScript {
+			add("tool %q: interactive is only for method script", t.ID)
+		}
 		for _, r := range t.Requires {
 			if !ids[r] {
 				add("tool %q: requires unknown tool %q", t.ID, r)
@@ -84,6 +87,18 @@ func (c *Catalog) Validate() error {
 		for _, h := range t.PostInstall {
 			if !slices.Contains(KnownPostInstall, h) {
 				add("tool %q: unknown post_install hook %q", t.ID, h)
+			}
+		}
+	}
+
+	interactive := map[string]bool{}
+	for _, t := range c.Tools {
+		interactive[t.ID] = t.Interactive
+	}
+	for _, t := range c.Tools {
+		for _, r := range t.Requires {
+			if interactive[r] {
+				add("tool %q: cannot require interactive tool %q", t.ID, r)
 			}
 		}
 	}

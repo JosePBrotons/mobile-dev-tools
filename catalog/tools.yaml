@@ -371,7 +371,7 @@ tools:
     post_install: [android-home-env]
     url: https://developer.android.com/studio/
     notes: [Large download]
-    next_steps: [Open Android Studio once to finish the setup wizard, 'Accept licenses with: sdkmanager --licenses']
+    next_steps: [Open Android Studio once to finish the setup wizard]
 
   - id: flutter
     name: Flutter
@@ -384,6 +384,35 @@ tools:
     requires: [homebrew]
     url: https://flutter.dev/
 
+  - id: android-cmdline-tools
+    name: Android command line tools
+    description: sdkmanager and avdmanager for the Android SDK
+    category: mobile-sdks
+    profiles: [rn, flutter]
+    method: cask
+    package: android-commandlinetools
+    check: command -v sdkmanager
+    requires: [homebrew]
+    url: https://developer.android.com/tools
+
+  - id: android-sdk
+    name: Android SDK components
+    description: Platform tools, emulator, one platform and build tools in ~/Library/Android/sdk
+    category: mobile-sdks
+    profiles: [rn, flutter]
+    method: script
+    interactive: true
+    install:
+      - export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+      - sdkmanager --sdk_root="$HOME/Library/Android/sdk" --licenses
+      - sdkmanager --sdk_root="$HOME/Library/Android/sdk" "platform-tools" "emulator" "platforms;android-36" "build-tools;36.0.0"
+    check: test -d "$HOME/Library/Android/sdk/platform-tools"
+    requires: [android-cmdline-tools, jdk]
+    post_install: [android-home-env]
+    url: https://developer.android.com/tools/sdkmanager
+    notes: [Asks you to review and accept the Android SDK licenses, Large download]
+    next_steps: [Gradle downloads any other platform or build tools a project asks for]
+
   - id: mas
     name: mas
     description: Mac App Store command line client
@@ -394,6 +423,18 @@ tools:
     check: command -v mas
     requires: [homebrew]
     url: https://github.com/mas-cli/mas
+
+  - id: xcodes
+    name: xcodes
+    description: Install and switch between several Xcode versions
+    category: clis
+    method: brew
+    package: xcodes
+    check: command -v xcodes
+    requires: [homebrew]
+    url: https://github.com/XcodesOrg/xcodes
+    notes: [Needs an Apple Developer account sign-in to download Xcode]
+    next_steps: ['Install Xcode with: xcodes install --latest']
 
   - id: xcode
     name: Xcode

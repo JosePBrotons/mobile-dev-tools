@@ -54,6 +54,13 @@ tools:
 		{"uninstall on brew", `
 tools:
   - {id: a, name: A, description: d, category: system, method: brew, package: a, uninstall: [x]}`, "uninstall is only for method script"},
+		{"interactive on brew", `
+tools:
+  - {id: a, name: A, description: d, category: system, method: brew, package: a, interactive: true}`, "interactive is only for method script"},
+		{"requires interactive", `
+tools:
+  - {id: a, name: A, description: d, category: system, method: script, install: [x], interactive: true}
+  - {id: b, name: B, description: d, category: system, method: brew, package: b, requires: [a]}`, "cannot require interactive tool"},
 		{"bad id", `
 tools:
   - {id: Bad_ID, name: A, description: d, category: system, method: brew, package: a}`, "kebab-case"},

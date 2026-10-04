@@ -42,6 +42,9 @@ type Config struct {
 	// SudoCmd returns the command that caches the admin password before an
 	// install. Nil skips the step.
 	SudoCmd func() *exec.Cmd
+	// InteractiveCmd returns the command for an interactive tool, run with
+	// the terminal attached. Nil runs interactive tools like any other.
+	InteractiveCmd func(script string) *exec.Cmd
 }
 
 // Model is the root Bubble Tea model.
@@ -122,7 +125,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.checking = false
 		m.info, m.installed = msg.info, msg.installed
 		return m, nil
-	case eventMsg, logMsg, doneMsg, sudoMsg:
+	case eventMsg, logMsg, doneMsg, sudoMsg, interactiveMsg:
 		return m.updateProgress(msg)
 	case tea.KeyMsg:
 		m.notice = ""

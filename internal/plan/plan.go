@@ -4,9 +4,11 @@ package plan
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"fmt"
 	"io"
+	"slices"
 	"strings"
 	"text/tabwriter"
 
@@ -167,6 +169,11 @@ func Resolve(c *catalog.Catalog, ids []string) ([]Item, error) {
 			visit(t)
 		}
 	}
+	// Interactive tools have no dependents (the catalog rejects them), so
+	// moving them last keeps dependencies first.
+	slices.SortStableFunc(items, func(a, b Item) int {
+		return cmp.Compare(boolInt(a.Tool.Interactive), boolInt(b.Tool.Interactive))
+	})
 	return items, nil
 }
 
@@ -332,4 +339,11 @@ func (p *Plan) Print(out io.Writer) error {
 	}
 	_, err := out.Write(w.Bytes())
 	return err
+}
+
+func boolInt(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }

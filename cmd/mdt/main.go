@@ -417,7 +417,8 @@ func (a *app) runTUI(ctx context.Context) (bool, error) {
 			path, f, err := a.openLog()
 			return path, f, err
 		},
-		SudoCmd: runner.SudoValidate,
+		SudoCmd:        runner.SudoValidate,
+		InteractiveCmd: runner.Command,
 	})
 }
 
