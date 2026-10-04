@@ -45,7 +45,9 @@ type Plan struct {
 // edits are idempotent and also run when the tool was already installed.
 type hook struct {
 	command string
-	lines   []string
+	// undo reverses command when the tool is uninstalled.
+	undo  string
+	lines []string
 	// skipIf is a substring of the profile that means the edit is already
 	// done, even by hand. Empty means only the first line is checked.
 	skipIf string
@@ -55,7 +57,7 @@ type hook struct {
 }
 
 var hooks = map[string]hook{
-	"mkcert-install":   {command: "mkcert -install"},
+	"mkcert-install":   {command: "mkcert -install", undo: "mkcert -uninstall"},
 	"android-home-env": {lines: shellenv.AndroidHomeLines},
 	"brew-shellenv":    {lines: []string{shellenv.BrewShellenvLine}, skipIf: "brew shellenv", edit: "load Homebrew"},
 }
@@ -188,6 +190,29 @@ func Commands(t catalog.Tool) []string {
 		}
 	}
 	return cmds
+}
+
+// UndoCommands returns the post_install reversals for t, to run before its
+// package is removed.
+func UndoCommands(t catalog.Tool) []string {
+	var cmds []string
+	for _, h := range t.PostInstall {
+		if c := hooks[h].undo; c != "" {
+			cmds = append(cmds, c)
+		}
+	}
+	return cmds
+}
+
+// ProfileHooks returns the names of t's hooks that edit the shell profile.
+func ProfileHooks(t catalog.Tool) []string {
+	var out []string
+	for _, h := range t.PostInstall {
+		if len(hooks[h].lines) > 0 {
+			out = append(out, h)
+		}
+	}
+	return out
 }
 
 // profileEdits describes the profile changes a tool's hooks make.

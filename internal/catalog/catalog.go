@@ -42,6 +42,9 @@ type Tool struct {
 	Method      Method   `yaml:"method"`
 	Package     string   `yaml:"package"`
 	Install     []string `yaml:"install"`
+	// Uninstall removes a script tool. Brew, cask and mas tools are removed
+	// from their package, so only script tools may set it.
+	Uninstall   []string `yaml:"uninstall"`
 	Check       string   `yaml:"check"`
 	Requires    []string `yaml:"requires"`
 	PostInstall []string `yaml:"post_install"`

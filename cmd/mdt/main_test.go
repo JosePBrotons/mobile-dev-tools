@@ -54,6 +54,10 @@ func TestUsageErrors(t *testing.T) {
 		{[]string{"upgrade", "--profile", "ios"}, `unknown profile "ios"`},
 		{[]string{"upgrade", "--only", "nope"}, `unknown tool "nope"`},
 		{[]string{"upgrade", "extra"}, `unexpected argument "extra"`},
+		{[]string{"uninstall"}, "name at least one tool"},
+		{[]string{"uninstall", "--dry-run"}, "name at least one tool"},
+		{[]string{"uninstall", "nope"}, `unknown tool "nope"`},
+		{[]string{"uninstall", "chrome", "--nope"}, "flag provided but not defined"},
 	}
 	for _, tt := range tests {
 		t.Run(strings.Join(tt.args, " "), func(t *testing.T) {
@@ -270,5 +274,45 @@ func TestUpgradeNothingToDo(t *testing.T) {
 	}
 	if strings.Contains(stdout.String(), "Proceed?") {
 		t.Fatal("asked to confirm with nothing to upgrade")
+	}
+}
+
+func TestUninstall(t *testing.T) {
+	tests := []struct {
+		name     string
+		goos     string
+		args     []string
+		stdin    string
+		fail     []string
+		wantCode int
+		wantOut  string
+		wantRan  bool
+	}{
+		{"dry run, flag last", "linux", []string{"uninstall", "chrome", "--dry-run"}, "", nil, 0, "brew uninstall --cask google-chrome", false},
+		{"dry run, flag first", "linux", []string{"uninstall", "--dry-run", "chrome"}, "", nil, 0, "remove", false},
+		{"refused off macOS", "linux", []string{"uninstall", "chrome"}, "", nil, 1, "", false},
+		{"confirmed", "darwin", []string{"uninstall", "chrome"}, "y\n", nil, 0, "uninstalled (1): Google Chrome", true},
+		{"declined", "darwin", []string{"uninstall", "chrome"}, "n\n", nil, 1, "Proceed?", false},
+		{"yes flag", "darwin", []string{"uninstall", "chrome", "--yes"}, "", nil, 0, "uninstalled (1)", true},
+		{"failure", "darwin", []string{"uninstall", "chrome", "--yes"}, "", []string{"brew uninstall --cask google-chrome"}, 1, "failed (1)", true},
+		{"all refused", "darwin", []string{"uninstall", "xcode", "--yes"}, "", nil, 1, "refused", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a, fake, stdout, stderr := newApp(t, tt.goos, tt.stdin, tt.fail...)
+			if code := a.run(context.Background(), tt.args); code != tt.wantCode {
+				t.Fatalf("exit %d, want %d\n%s%s", code, tt.wantCode, stdout, stderr)
+			}
+			if !strings.Contains(stdout.String(), tt.wantOut) {
+				t.Fatalf("stdout does not contain %q:\n%s", tt.wantOut, stdout)
+			}
+			ran := false
+			for _, call := range fake.Calls() {
+				ran = ran || strings.Contains(call, "brew uninstall")
+			}
+			if ran != tt.wantRan {
+				t.Fatalf("ran brew uninstall = %v, want %v", ran, tt.wantRan)
+			}
+		})
 	}
 }

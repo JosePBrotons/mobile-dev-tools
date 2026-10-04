@@ -17,6 +17,7 @@ type Status string
 const (
 	StatusInstalled Status = "installed"
 	StatusUpgraded  Status = "upgraded"
+	StatusRemoved   Status = "uninstalled"
 	StatusPresent   Status = "already installed"
 	StatusSkipped   Status = "skipped"
 	StatusFailed    Status = "failed"

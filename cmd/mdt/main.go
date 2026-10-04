@@ -24,6 +24,7 @@ import (
 	"github.com/josepbrotons/mobile-dev-tools/internal/plan"
 	"github.com/josepbrotons/mobile-dev-tools/internal/runner"
 	"github.com/josepbrotons/mobile-dev-tools/internal/tui"
+	"github.com/josepbrotons/mobile-dev-tools/internal/uninstall"
 	"github.com/josepbrotons/mobile-dev-tools/internal/upgrade"
 )
 
@@ -33,6 +34,7 @@ const usage = `Usage:
   mdt install (--profile <id> | --only <id,id,...>) [--dry-run] [--yes]
   mdt doctor [--profile <id> | --only <id,id,...>]
   mdt upgrade [--profile <id> | --only <id,id,...>] [--dry-run] [--yes]
+  mdt uninstall <id>... [--dry-run] [--yes]
   mdt list
 
 Run "mdt list" to see profiles and tool ids.
@@ -101,6 +103,8 @@ func (a *app) run(ctx context.Context, args []string) int {
 		err = a.doctor(ctx, args[1:])
 	case "upgrade":
 		err = a.upgrade(ctx, args[1:])
+	case "uninstall":
+		err = a.uninstall(ctx, args[1:])
 	case "list":
 		err = a.list()
 	case "help", "-h", "--help":
@@ -301,6 +305,82 @@ func (a *app) upgrade(ctx context.Context, args []string) error {
 	return nil
 }
 
+// parseUninstall reads tool ids and --dry-run / --yes in any order, so
+// "mdt uninstall chrome --dry-run" works.
+func parseUninstall(args []string, c *catalog.Catalog) (ids []string, dryRun, yes bool, err error) {
+	fs := flag.NewFlagSet("uninstall", flag.ContinueOnError)
+	fs.SetOutput(io.Discard)
+	fs.BoolVar(&dryRun, "dry-run", false, "print the plan without uninstalling")
+	fs.BoolVar(&yes, "yes", false, "do not ask for confirmation")
+	for {
+		if err := fs.Parse(args); err != nil {
+			return nil, false, false, fmt.Errorf("%w: %v", errUsage, err)
+		}
+		if fs.NArg() == 0 {
+			break
+		}
+		if id := fs.Arg(0); !slices.Contains(ids, id) {
+			ids = append(ids, id)
+		}
+		args = fs.Args()[1:]
+	}
+	if len(ids) == 0 {
+		return nil, false, false, fmt.Errorf("%w: name at least one tool to uninstall", errUsage)
+	}
+	for _, id := range ids {
+		if _, ok := c.ByID(id); !ok {
+			return nil, false, false, fmt.Errorf("%w: unknown tool %q", errUsage, id)
+		}
+	}
+	return ids, dryRun, yes, nil
+}
+
+func (a *app) uninstall(ctx context.Context, args []string) error {
+	c, err := catalog.Load()
+	if err != nil {
+		return err
+	}
+	ids, dryRun, yes, err := parseUninstall(args, c)
+	if err != nil {
+		return err
+	}
+	if !dryRun && a.goos != "darwin" {
+		return fmt.Errorf("uninstalls run on macOS only; use --dry-run to preview the plan")
+	}
+	say(a.stderr, "Checking installed tools...\n")
+	p, err := uninstall.Check(ctx, c, a.runner, ids)
+	if err != nil {
+		return err
+	}
+	if err := p.Print(a.stdout); err != nil {
+		return err
+	}
+	if dryRun {
+		return nil
+	}
+	if len(p.Runnable()) == 0 {
+		return errors.New("nothing to uninstall")
+	}
+	if !yes && !a.confirm() {
+		return errors.New("aborted")
+	}
+
+	logPath, logFile, err := a.openLog()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = logFile.Close() }()
+	say(a.stdout, "\nLogging to %s\n", logPath)
+
+	out := io.MultiWriter(a.stdout, logFile)
+	report := uninstall.Execute(ctx, p, a.runner, out, func(e plan.Event) { printEvent(out, e) })
+	a.printSummary(report, logPath, uninstall.NextSteps(p, report))
+	if report.Failed() {
+		return errors.New("some tools failed to uninstall")
+	}
+	return nil
+}
+
 func (a *app) interactive(ctx context.Context) error {
 	if !a.tty {
 		return errors.New("the interactive mode needs a terminal; use mdt install instead")
@@ -367,7 +447,7 @@ func printEvent(w io.Writer, e plan.Event) {
 }
 
 func (a *app) printSummary(r plan.Report, logPath string, steps []string) {
-	order := []plan.Status{plan.StatusInstalled, plan.StatusUpgraded, plan.StatusPresent, plan.StatusSkipped, plan.StatusFailed}
+	order := []plan.Status{plan.StatusInstalled, plan.StatusUpgraded, plan.StatusRemoved, plan.StatusPresent, plan.StatusSkipped, plan.StatusFailed}
 	byStatus := map[plan.Status][]string{}
 	for _, res := range r.Results {
 		name := res.Name

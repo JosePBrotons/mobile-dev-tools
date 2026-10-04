@@ -73,6 +73,9 @@ func (c *Catalog) Validate() error {
 		default:
 			add("tool %q: unknown method %q", t.ID, t.Method)
 		}
+		if len(t.Uninstall) > 0 && t.Method != MethodScript {
+			add("tool %q: uninstall is only for method script", t.ID)
+		}
 		for _, r := range t.Requires {
 			if !ids[r] {
 				add("tool %q: requires unknown tool %q", t.ID, r)

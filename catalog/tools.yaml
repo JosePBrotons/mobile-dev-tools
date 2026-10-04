@@ -240,6 +240,7 @@ tools:
     profiles: [rn, web]
     method: script
     install: [npm install -g typescript]
+    uninstall: [npm uninstall -g typescript]
     check: command -v tsc
     requires: [node]
     url: https://www.typescriptlang.org/
