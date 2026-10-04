@@ -61,6 +61,8 @@ ROADMAP.md                          plan for the TUI
 3. Update the tool list in `README.md`.
 4. Run the checks below.
 
+To review the whole catalog for stale pins and deprecated packages, follow [docs/catalog-refresh.md](docs/catalog-refresh.md).
+
 ## Verification
 
 Agent sandboxes and CI runners are usually Linux, so the install scripts cannot run there. Never execute them outside a real Mac. Instead:
