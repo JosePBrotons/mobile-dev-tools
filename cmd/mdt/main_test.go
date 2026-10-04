@@ -152,3 +152,35 @@ func TestList(t *testing.T) {
 		}
 	}
 }
+
+func TestInteractiveNeedsTerminal(t *testing.T) {
+	a, _, _, stderr := newApp(t, "darwin", "")
+	if code := a.run(context.Background(), []string{"tui"}); code != 1 {
+		t.Fatalf("exit %d, want 1", code)
+	}
+	if !strings.Contains(stderr.String(), "needs a terminal") {
+		t.Fatalf("stderr = %q", stderr.String())
+	}
+}
+
+func TestNoArgsStartsTUIOnTerminal(t *testing.T) {
+	tests := []struct {
+		name     string
+		failed   bool
+		wantCode int
+	}{
+		{"clean exit", false, 0},
+		{"failed installs", true, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a, _, _, _ := newApp(t, "darwin", "")
+			a.tty = true
+			var started bool
+			a.tui = func(context.Context) (bool, error) { started = true; return tt.failed, nil }
+			if code := a.run(context.Background(), nil); code != tt.wantCode || !started {
+				t.Fatalf("exit %d started %v", code, started)
+			}
+		})
+	}
+}

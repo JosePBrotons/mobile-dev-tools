@@ -273,3 +273,27 @@ func TestCommandsMatchLegacyScripts(t *testing.T) {
 		})
 	}
 }
+
+func TestBuildRowsNotes(t *testing.T) {
+	c := load(t)
+	p, err := Build(c, []string{"cocoapods"}, map[string]bool{"xcode-clt": true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	rows := p.Rows()
+	if len(rows) == 0 || rows[0].Status != "installed" || rows[0].Name != "Xcode Command Line Tools" {
+		t.Fatalf("first row = %+v", rows[0])
+	}
+	var sawUpdate, sawReason bool
+	for _, r := range rows {
+		sawUpdate = sawUpdate || r.Name == "(Homebrew update)"
+		sawReason = sawReason || strings.HasPrefix(r.Reason, "required by ")
+	}
+	if !sawUpdate || !sawReason {
+		t.Fatalf("rows = %+v", rows)
+	}
+	notes := p.Notes()
+	if len(notes) != 1 || !strings.Contains(notes[0], "admin password") {
+		t.Fatalf("notes = %v", notes)
+	}
+}

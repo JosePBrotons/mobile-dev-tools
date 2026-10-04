@@ -63,7 +63,16 @@ func New(ctx context.Context, c *catalog.Catalog, ids []string, r runner.Runner)
 	for i, it := range items {
 		tools[i] = it.Tool
 	}
-	installed := detect.Installed(ctx, r, tools)
+	return Build(c, ids, detect.Installed(ctx, r, tools))
+}
+
+// Build resolves ids like New but takes the detection result, so a UI can
+// detect once and rebuild the plan whenever the selection changes.
+func Build(c *catalog.Catalog, ids []string, installed map[string]bool) (*Plan, error) {
+	items, err := Resolve(c, ids)
+	if err != nil {
+		return nil, err
+	}
 	for i := range items {
 		items[i].Installed = installed[items[i].Tool.ID]
 	}
@@ -200,6 +209,60 @@ func (p *Plan) Pending() []Item {
 	return out
 }
 
+// Row is one line of the plan table.
+type Row struct {
+	// Status is "install" or "installed".
+	Status string
+	Name   string
+	// Commands lists what runs, or the profile edits for an installed tool.
+	Commands []string
+	// Reason is empty when the user selected the tool.
+	Reason string
+}
+
+// Detail joins the commands and appends the reason, as the dry run shows it.
+func (r Row) Detail() string {
+	detail := strings.Join(r.Commands, " && ")
+	if r.Reason != "" {
+		detail = strings.TrimSpace(detail + "  (" + r.Reason + ")")
+	}
+	return detail
+}
+
+// Rows returns the plan table, including the single Homebrew update row
+// before the first Homebrew install.
+func (p *Plan) Rows() []Row {
+	var rows []Row
+	updated := false
+	for _, it := range p.Items {
+		row := Row{Status: "installed", Name: it.Tool.Name, Commands: profileEdits(it.Tool)}
+		if !it.Installed {
+			row.Status = "install"
+			if usesBrew(it.Tool) && !updated {
+				updated = true
+				rows = append(rows, Row{Status: "install", Name: "(Homebrew update)", Commands: []string{BrewUpdate}})
+			}
+			row.Commands = append(Commands(it.Tool), row.Commands...)
+		}
+		if it.RequiredBy != "" {
+			row.Reason = it.Reason()
+		}
+		rows = append(rows, row)
+	}
+	return rows
+}
+
+// Notes returns one "Tool: note" line for every note of a pending tool.
+func (p *Plan) Notes() []string {
+	var notes []string
+	for _, it := range p.Pending() {
+		for _, n := range it.Tool.Notes {
+			notes = append(notes, fmt.Sprintf("%s: %s", it.Tool.Name, n))
+		}
+	}
+	return notes
+}
+
 // Print writes the dry-run view of the plan.
 func (p *Plan) Print(out io.Writer) error {
 	var w bytes.Buffer
@@ -209,26 +272,11 @@ func (p *Plan) Print(out io.Writer) error {
 
 	var table bytes.Buffer
 	tw := tabwriter.NewWriter(&table, 0, 0, 2, ' ', 0)
-	rows := []string{"  STATUS\tTOOL\tCOMMANDS"}
-	updated := false
-	for _, it := range p.Items {
-		status, cmds := "installed", profileEdits(it.Tool)
-		if !it.Installed {
-			status = "install"
-			if usesBrew(it.Tool) && !updated {
-				updated = true
-				rows = append(rows, "  install\t(Homebrew update)\t"+BrewUpdate)
-			}
-			cmds = append(Commands(it.Tool), cmds...)
-		}
-		detail := strings.Join(cmds, " && ")
-		if it.RequiredBy != "" {
-			detail = strings.TrimSpace(detail + "  (" + it.Reason() + ")")
-		}
-		rows = append(rows, fmt.Sprintf("  %s\t%s\t%s", status, it.Tool.Name, detail))
+	if _, err := fmt.Fprintln(tw, "  STATUS\tTOOL\tCOMMANDS"); err != nil {
+		return err
 	}
-	for _, row := range rows {
-		if _, err := fmt.Fprintln(tw, row); err != nil {
+	for _, r := range p.Rows() {
+		if _, err := fmt.Fprintf(tw, "  %s\t%s\t%s\n", r.Status, r.Name, r.Detail()); err != nil {
 			return err
 		}
 	}
@@ -242,14 +290,8 @@ func (p *Plan) Print(out io.Writer) error {
 		}
 	}
 
-	var notes []string
-	for _, it := range p.Pending() {
-		for _, n := range it.Tool.Notes {
-			notes = append(notes, fmt.Sprintf("  %s: %s", it.Tool.Name, n))
-		}
-	}
-	if len(notes) > 0 {
-		fmt.Fprintf(&w, "\nNotes:\n%s\n", strings.Join(notes, "\n"))
+	if notes := p.Notes(); len(notes) > 0 {
+		fmt.Fprintf(&w, "\nNotes:\n  %s\n", strings.Join(notes, "\n  "))
 	}
 	_, err := out.Write(w.Bytes())
 	return err

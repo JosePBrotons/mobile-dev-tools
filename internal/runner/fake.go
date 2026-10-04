@@ -11,16 +11,26 @@ import (
 // Scripts that match nothing succeed.
 type Fake struct {
 	Fail map[string]error
+	// Output maps a substring to text written to out by scripts that
+	// contain it.
+	Output map[string]string
 
 	mu    sync.Mutex
 	calls []string
 }
 
 // Run implements Runner.
-func (f *Fake) Run(_ context.Context, script string, _ io.Writer) error {
+func (f *Fake) Run(_ context.Context, script string, out io.Writer) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.calls = append(f.calls, script)
+	if out != nil {
+		for substr, text := range f.Output {
+			if strings.Contains(script, substr) {
+				_, _ = io.WriteString(out, text)
+			}
+		}
+	}
 	for substr, err := range f.Fail {
 		if strings.Contains(script, substr) {
 			return err

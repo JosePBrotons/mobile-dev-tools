@@ -46,7 +46,10 @@ type Tool struct {
 	Requires    []string `yaml:"requires"`
 	PostInstall []string `yaml:"post_install"`
 	Notes       []string `yaml:"notes"`
-	URL         string   `yaml:"url"`
+	// NextSteps are manual follow-ups shown on the summary after the tool
+	// was installed.
+	NextSteps []string `yaml:"next_steps"`
+	URL       string   `yaml:"url"`
 }
 
 // Catalog is the whole parsed file.

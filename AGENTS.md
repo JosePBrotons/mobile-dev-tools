@@ -26,11 +26,11 @@ internal/runner/                    the only package that executes commands; Fak
 internal/shellenv/                  prelude for every step, idempotent ~/.zprofile edits
 internal/detect/                    runs each tool's check
 internal/plan/                      resolve, dry-run output, execute with progress events
-cmd/mdt/                            CLI: mdt install, mdt list
+internal/sysinfo/                   macOS version, arch, free disk for the welcome screen
+internal/tui/                       Bubble Tea TUI (no install logic)
+cmd/mdt/                            CLI: mdt (TUI), mdt install, mdt list
 ROADMAP.md                          plan for the TUI
 ```
-
-Planned Go layout (Phase 3+): `internal/tui/`.
 
 ## Shell conventions
 

@@ -48,3 +48,24 @@ func TestFake(t *testing.T) {
 		t.Fatalf("calls = %v", got)
 	}
 }
+
+func TestFakeOutput(t *testing.T) {
+	f := &Fake{Output: map[string]string{"sw_vers": "15.1\n"}}
+	var out strings.Builder
+	if err := f.Run(context.Background(), "sw_vers -productVersion", &out); err != nil {
+		t.Fatal(err)
+	}
+	if out.String() != "15.1\n" {
+		t.Fatalf("out = %q", out.String())
+	}
+}
+
+func TestExecStdin(t *testing.T) {
+	var out strings.Builder
+	if err := (Exec{Stdin: strings.NewReader("typed\n")}).Run(context.Background(), "read x; echo got $x", &out); err != nil {
+		t.Fatal(err)
+	}
+	if out.String() != "got typed\n" {
+		t.Fatalf("out = %q", out.String())
+	}
+}
