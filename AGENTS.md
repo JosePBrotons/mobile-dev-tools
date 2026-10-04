@@ -25,10 +25,11 @@ internal/catalog/                   loader and validator for the catalog
 internal/runner/                    the only package that executes commands; Fake for tests
 internal/shellenv/                  prelude for every step, idempotent ~/.zprofile edits
 internal/detect/                    runs each tool's check
+internal/doctor/                    read-only environment checks for mdt doctor
 internal/plan/                      resolve, dry-run output, execute with progress events
 internal/sysinfo/                   macOS version, arch, free disk for the welcome screen
 internal/tui/                       Bubble Tea TUI (no install logic)
-cmd/mdt/                            CLI: mdt (TUI), mdt install, mdt list
+cmd/mdt/                            CLI: mdt (TUI), mdt install, mdt doctor, mdt list
 ROADMAP.md                          plan for the TUI
 ```
 

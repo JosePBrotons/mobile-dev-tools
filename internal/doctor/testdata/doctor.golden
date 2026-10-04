@@ -1,0 +1,21 @@
+Tools:
+  ok       Xcode Command Line Tools
+  ok       Homebrew
+  ok       nvm
+  missing  CocoaPods (not installed)
+  ok       Android Studio
+Environment:
+  problem  Homebrew is loaded by ~/.zprofile
+           fix: echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+  problem  nvm is loaded by the shell profile
+           fix: add 'export NVM_DIR="$HOME/.nvm"' and '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' to ~/.zshrc
+  problem  ANDROID_HOME is set in ~/.zprofile
+           fix: echo 'export PATH=$PATH:$ANDROID_HOME/emulator' >> ~/.zprofile
+           echo 'export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin' >> ~/.zprofile
+           echo 'export PATH=$PATH:$ANDROID_HOME/platform-tools' >> ~/.zprofile
+  problem  Android SDK folder exists
+           fix: open Android Studio once to finish the setup wizard
+
+Install missing tools: mdt install --only cocoapods
+
+5 problems found.

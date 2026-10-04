@@ -35,7 +35,7 @@ func EnsureLines(path string, lines []string) (bool, error) {
 	if len(lines) == 0 {
 		return false, nil
 	}
-	present, err := hasLine(path, lines[0])
+	present, err := HasLine(path, lines[0])
 	if err != nil || present {
 		return false, err
 	}
@@ -54,7 +54,8 @@ func EnsureLines(path string, lines []string) (bool, error) {
 	return true, f.Close()
 }
 
-func hasLine(path, line string) (bool, error) {
+// HasLine reports whether path has a line equal to line. A missing file has none.
+func HasLine(path, line string) (bool, error) {
 	f, err := os.Open(path)
 	if os.IsNotExist(err) {
 		return false, nil
@@ -70,4 +71,17 @@ func hasLine(path, line string) (bool, error) {
 		}
 	}
 	return false, sc.Err()
+}
+
+// Contains reports whether the file at path contains substr. A missing file
+// contains nothing.
+func Contains(path, substr string) (bool, error) {
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(string(data), substr), nil
 }

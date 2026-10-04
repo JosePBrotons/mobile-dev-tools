@@ -67,6 +67,8 @@ To keep in mind:
 
     $ go run ./cmd/mdt                                       (interactive TUI)
     $ go run ./cmd/mdt list                                  (profiles and tool ids)
+    $ go run ./cmd/mdt doctor                                (check installed tools and shell setup)
+    $ go run ./cmd/mdt doctor --profile rn                   (also report missing rn tools)
     $ go run ./cmd/mdt install --profile rn --dry-run        (show the plan only)
     $ go run ./cmd/mdt install --profile rn                  (asks before installing)
     $ go run ./cmd/mdt install --only node,watchman --yes    (pick tools, no prompt)

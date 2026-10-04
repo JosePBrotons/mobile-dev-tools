@@ -92,7 +92,7 @@ Keys: `space` toggle, `a` select all, `/` filter, `enter` continue, `esc` back, 
 
 ## Phase 4: Updates and maintenance
 
-- `mdt doctor`: verify each selected tool and env var, suggest fixes.
+- `mdt doctor` (done): `mdt doctor [--profile <id> | --only a,b]` runs each tool's check and verifies the profile edits (Homebrew shellenv and nvm loading, `ANDROID_HOME` lines and SDK folder), printing a fix for each problem. Exit 1 when problems are found. Deferred: the mkcert hook is not verified. Found a gap: nothing writes `brew shellenv` to `~/.zprofile`, so a fresh Mac may not find `brew` in new terminals; fix it with a `post_install` hook later.
 - `mdt upgrade`: wrap `brew outdated` / `brew upgrade` for catalog tools and bump Node to the latest LTS via nvm.
 - Optional `mdt uninstall <id>`.
 - A recurring catalog refresh checklist: JDK level required by React Native and the Android Gradle Plugin, latest nvm release, deprecated casks, Xcode install method.
