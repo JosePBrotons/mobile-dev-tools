@@ -24,6 +24,7 @@ import (
 	"github.com/josepbrotons/mobile-dev-tools/internal/plan"
 	"github.com/josepbrotons/mobile-dev-tools/internal/runner"
 	"github.com/josepbrotons/mobile-dev-tools/internal/tui"
+	"github.com/josepbrotons/mobile-dev-tools/internal/upgrade"
 )
 
 const usage = `Usage:
@@ -31,6 +32,7 @@ const usage = `Usage:
   mdt tui              same as above
   mdt install (--profile <id> | --only <id,id,...>) [--dry-run] [--yes]
   mdt doctor [--profile <id> | --only <id,id,...>]
+  mdt upgrade [--profile <id> | --only <id,id,...>] [--dry-run] [--yes]
   mdt list
 
 Run "mdt list" to see profiles and tool ids.
@@ -97,6 +99,8 @@ func (a *app) run(ctx context.Context, args []string) int {
 		err = a.install(ctx, args[1:])
 	case "doctor":
 		err = a.doctor(ctx, args[1:])
+	case "upgrade":
+		err = a.upgrade(ctx, args[1:])
 	case "list":
 		err = a.list()
 	case "help", "-h", "--help":
@@ -125,20 +129,20 @@ type installFlags struct {
 }
 
 func parseInstall(args []string, c *catalog.Catalog) (installFlags, error) {
-	return parseSelection("install", args, c, true)
+	return parseSelection("install", args, c, true, true)
 }
 
-// parseSelection parses --profile, --only and, for install, --dry-run and
-// --yes. With required set, exactly one of --profile and --only is needed;
-// otherwise at most one.
-func parseSelection(name string, args []string, c *catalog.Catalog, required bool) (installFlags, error) {
+// parseSelection parses --profile, --only and, with runFlags set,
+// --dry-run and --yes. With required set, exactly one of --profile and
+// --only is needed; otherwise at most one.
+func parseSelection(name string, args []string, c *catalog.Catalog, required, runFlags bool) (installFlags, error) {
 	var f installFlags
 	var only string
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	fs.SetOutput(io.Discard)
 	fs.StringVar(&f.profile, "profile", "", "profile to check or install")
 	fs.StringVar(&only, "only", "", "comma separated tool ids")
-	if required {
+	if runFlags {
 		fs.BoolVar(&f.dryRun, "dry-run", false, "print the plan without installing")
 		fs.BoolVar(&f.yes, "yes", false, "do not ask for confirmation")
 	}
@@ -216,7 +220,7 @@ func (a *app) install(ctx context.Context, args []string) error {
 	out := io.MultiWriter(a.stdout, logFile)
 	opts := plan.Options{Home: a.home, Log: out}
 	report := plan.Execute(ctx, p, a.runner, opts, func(e plan.Event) { printEvent(out, e) })
-	a.printSummary(p, report, logPath)
+	a.printSummary(report, logPath, plan.NextSteps(p, report))
 	if report.Failed() {
 		return errors.New("some tools failed to install")
 	}
@@ -228,7 +232,7 @@ func (a *app) doctor(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	f, err := parseSelection("doctor", args, c, false)
+	f, err := parseSelection("doctor", args, c, false, false)
 	if err != nil {
 		return err
 	}
@@ -246,6 +250,53 @@ func (a *app) doctor(ctx context.Context, args []string) error {
 	}
 	if n := rep.Problems(); n > 0 {
 		return fmt.Errorf("%d problems found", n)
+	}
+	return nil
+}
+
+func (a *app) upgrade(ctx context.Context, args []string) error {
+	c, err := catalog.Load()
+	if err != nil {
+		return err
+	}
+	f, err := parseSelection("upgrade", args, c, false, true)
+	if err != nil {
+		return err
+	}
+	if !f.dryRun && a.goos != "darwin" {
+		return fmt.Errorf("upgrades run on macOS only; use --dry-run to preview the plan")
+	}
+	ids := f.only
+	for _, t := range c.ForProfile(f.profile) {
+		ids = append(ids, t.ID)
+	}
+	say(a.stderr, "Checking for upgrades...\n")
+	p, err := upgrade.Check(ctx, c, a.runner, ids)
+	if err != nil {
+		return err
+	}
+	if err := p.Print(a.stdout); err != nil {
+		return err
+	}
+	if f.dryRun || len(p.Runnable()) == 0 {
+		return nil
+	}
+	if !f.yes && !a.confirm() {
+		return errors.New("aborted")
+	}
+
+	logPath, logFile, err := a.openLog()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = logFile.Close() }()
+	say(a.stdout, "\nLogging to %s\n", logPath)
+
+	out := io.MultiWriter(a.stdout, logFile)
+	report := upgrade.Execute(ctx, p, a.runner, out, func(e plan.Event) { printEvent(out, e) })
+	a.printSummary(report, logPath, upgrade.NextSteps(p, report))
+	if report.Failed() {
+		return errors.New("some tools failed to upgrade")
 	}
 	return nil
 }
@@ -315,8 +366,8 @@ func printEvent(w io.Writer, e plan.Event) {
 	say(w, "[%s] %s\n", r.Name, r.Status)
 }
 
-func (a *app) printSummary(p *plan.Plan, r plan.Report, logPath string) {
-	order := []plan.Status{plan.StatusInstalled, plan.StatusPresent, plan.StatusSkipped, plan.StatusFailed}
+func (a *app) printSummary(r plan.Report, logPath string, steps []string) {
+	order := []plan.Status{plan.StatusInstalled, plan.StatusUpgraded, plan.StatusPresent, plan.StatusSkipped, plan.StatusFailed}
 	byStatus := map[plan.Status][]string{}
 	for _, res := range r.Results {
 		name := res.Name
@@ -332,7 +383,7 @@ func (a *app) printSummary(p *plan.Plan, r plan.Report, logPath string) {
 		}
 	}
 	say(a.stdout, "\nLog: %s\n", logPath)
-	if steps := plan.NextSteps(p, r); len(steps) > 0 {
+	if len(steps) > 0 {
 		say(a.stdout, "\nNext steps:\n")
 		for _, s := range steps {
 			say(a.stdout, "  %s\n", s)

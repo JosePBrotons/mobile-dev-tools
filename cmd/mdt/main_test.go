@@ -50,6 +50,10 @@ func TestUsageErrors(t *testing.T) {
 		{[]string{"doctor", "--profile", "ios"}, `unknown profile "ios"`},
 		{[]string{"doctor", "--only", "nope"}, `unknown tool "nope"`},
 		{[]string{"doctor", "extra"}, `unexpected argument "extra"`},
+		{[]string{"upgrade", "--profile", "rn", "--only", "node"}, "at most one of --profile or --only"},
+		{[]string{"upgrade", "--profile", "ios"}, `unknown profile "ios"`},
+		{[]string{"upgrade", "--only", "nope"}, `unknown tool "nope"`},
+		{[]string{"upgrade", "extra"}, `unexpected argument "extra"`},
 	}
 	for _, tt := range tests {
 		t.Run(strings.Join(tt.args, " "), func(t *testing.T) {
@@ -210,5 +214,61 @@ func TestDoctorExitCodes(t *testing.T) {
 				t.Fatalf("stdout does not contain %q:\n%s", tt.wantOut, stdout)
 			}
 		})
+	}
+}
+
+// outdatedGH makes brew outdated report a newer GitHub CLI.
+const outdatedGH = `{"formulae":[{"name":"gh","installed_versions":["2.80.0"],"current_version":"2.81.0"}],"casks":[]}`
+
+func TestUpgrade(t *testing.T) {
+	tests := []struct {
+		name     string
+		goos     string
+		args     []string
+		stdin    string
+		fail     []string
+		wantCode int
+		wantOut  string
+		wantRan  bool
+	}{
+		{"dry run", "linux", []string{"upgrade", "--only", "gh", "--dry-run"}, "", nil, 0, "brew upgrade gh", false},
+		{"refused off macOS", "linux", []string{"upgrade", "--only", "gh"}, "", nil, 1, "", false},
+		{"confirmed", "darwin", []string{"upgrade", "--only", "gh"}, "y\n", nil, 0, "upgraded (1): GitHub CLI", true},
+		{"declined", "darwin", []string{"upgrade", "--only", "gh"}, "n\n", nil, 1, "Proceed?", false},
+		{"yes flag", "darwin", []string{"upgrade", "--only", "gh", "--yes"}, "", nil, 0, "upgraded (1)", true},
+		{"failure", "darwin", []string{"upgrade", "--only", "gh", "--yes"}, "", []string{"brew upgrade gh"}, 1, "failed (1)", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a, fake, stdout, stderr := newApp(t, tt.goos, tt.stdin, tt.fail...)
+			fake.Output = map[string]string{"brew outdated": outdatedGH}
+			if code := a.run(context.Background(), tt.args); code != tt.wantCode {
+				t.Fatalf("exit %d, want %d\n%s%s", code, tt.wantCode, stdout, stderr)
+			}
+			if !strings.Contains(stdout.String(), tt.wantOut) {
+				t.Fatalf("stdout does not contain %q:\n%s", tt.wantOut, stdout)
+			}
+			ran := false
+			for _, call := range fake.Calls() {
+				ran = ran || strings.Contains(call, "brew upgrade gh")
+			}
+			if ran != tt.wantRan {
+				t.Fatalf("ran brew upgrade = %v, want %v", ran, tt.wantRan)
+			}
+		})
+	}
+}
+
+func TestUpgradeNothingToDo(t *testing.T) {
+	a, fake, stdout, _ := newApp(t, "darwin", "")
+	fake.Output = map[string]string{"brew outdated": `{"formulae":[],"casks":[]}`}
+	if code := a.run(context.Background(), []string{"upgrade", "--only", "gh"}); code != 0 {
+		t.Fatalf("exit %d", code)
+	}
+	if !strings.Contains(stdout.String(), "0 available, 1 up to date") {
+		t.Fatalf("stdout:\n%s", stdout)
+	}
+	if strings.Contains(stdout.String(), "Proceed?") {
+		t.Fatal("asked to confirm with nothing to upgrade")
 	}
 }
