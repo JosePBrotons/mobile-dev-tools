@@ -51,7 +51,7 @@ It downloads the latest release, checks its checksum and puts `mdt` in `~/.local
     $ brew install josepbrotons/tap/mdt
     $ go install github.com/josepbrotons/mobile-dev-tools/cmd/mdt@latest
 
-The Homebrew tap and the first release exist only after a version is tagged (see Contributing).
+The Homebrew tap and the first release exist only after a version is released (see Releasing in AGENTS.md).
 
 To keep in mind:
 
