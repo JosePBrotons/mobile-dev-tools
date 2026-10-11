@@ -98,6 +98,17 @@ tools:
     requires: [homebrew]
     url: https://www.warp.dev/terminal
 
+  - id: ghostty
+    name: Ghostty
+    description: Fast, GPU-accelerated terminal emulator
+    category: terminals-editors
+    profiles: []
+    method: cask
+    package: ghostty
+    check: test -d "/Applications/Ghostty.app"
+    requires: [homebrew]
+    url: https://ghostty.org/
+
   - id: claude
     name: Claude
     description: Anthropic's Claude desktop app

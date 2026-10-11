@@ -36,7 +36,7 @@
 - [Maven](https://maven.apache.org/)
 - [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 
-These optional tools are in the `mdt` catalog but belong to no profile, so they are never preselected: Google Chrome, Zed, Warp, Cursor, Google Antigravity, and the Claude, ChatGPT and Gemini desktop apps (Gemini needs Apple silicon and macOS 15 or newer). xcodes (several Xcode versions side by side) is optional too. Pick them in the TUI or with `mdt install --only chrome,zed,claude,xcodes`.
+These optional tools are in the `mdt` catalog but belong to no profile, so they are never preselected: Google Chrome, Zed, Warp, Ghostty, Cursor, Google Antigravity, and the Claude, ChatGPT and Gemini desktop apps (Gemini needs Apple silicon and macOS 15 or newer). xcodes (several Xcode versions side by side) is optional too. Pick them in the TUI or with `mdt install --only chrome,zed,claude,xcodes`.
 
 Jest is no longer installed globally: React Native projects ship it as a project dependency.
 
