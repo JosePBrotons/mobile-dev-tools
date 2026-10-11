@@ -78,7 +78,13 @@ Both must pass with no output. For Go code, also run `go test ./...` and `mdt in
 
 ## Releasing
 
-CI (`.github/workflows/ci.yml`) runs on every PR. To release, tag master and push the tag: `git tag vX.Y.Z && git push origin vX.Y.Z`. `release.yml` runs GoReleaser, which publishes the GitHub release (universal darwin binary, `checksums.txt`) that `install.sh` downloads, and updates the Homebrew cask in `JosePBrotons/homebrew-tap` when the `HOMEBREW_TAP_GITHUB_TOKEN` secret is set (a fine-grained token with Contents read and write on that repo; without it the tap is skipped). Check a config change locally with `goreleaser release --snapshot --clean`.
+CI (`.github/workflows/ci.yml`) runs on every PR and on every push to master. To release, open the Actions tab, pick "Release", run it from master and choose `bump` (patch, minor or major; default patch). Or from a terminal: `gh workflow run release-bump.yml --ref master -f bump=patch`.
+
+`release-bump.yml` fails unless it runs from master, CI succeeded on that commit and the next tag does not exist yet. It takes the highest `vX.Y.Z` tag reachable from master, bumps it, and pushes an annotated tag. Tags pushed with the default `GITHUB_TOKEN` do not start other workflows, so the same workflow then calls `release.yml` directly (a reusable workflow) with that tag. This needs no extra secret. A PAT or GitHub App token would also work, but it is one more credential to create and rotate.
+
+`release.yml` runs GoReleaser, which publishes the GitHub release (universal darwin binary, `checksums.txt`) that `install.sh` downloads, and updates the Homebrew cask in `JosePBrotons/homebrew-tap` when the `HOMEBREW_TAP_GITHUB_TOKEN` secret is set. That is the only secret to create: a fine-grained token with Contents read and write on the tap repo, added as a repository secret. Without it the tap is skipped. `release.yml` still runs on a manually pushed `v*` tag (`git tag vX.Y.Z && git push origin vX.Y.Z`), which also works for a version the bump cannot produce.
+
+Check a config change locally with `goreleaser release --snapshot --clean`.
 
 ## Commits and branches
 

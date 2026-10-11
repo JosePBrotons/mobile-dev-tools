@@ -101,7 +101,7 @@ None of these have been run for real on a Mac beyond dry runs: `upgrade --dry-ru
 
 ## Phase 5: Distribution and CI (done)
 
-Shipped: `.goreleaser.yaml` builds a universal darwin binary on each `v*` tag (`.github/workflows/release.yml`), with `checksums.txt` and a Homebrew cask pushed to `JosePBrotons/homebrew-tap`. `install.sh` downloads the latest release, verifies the checksum and installs to `~/.local/bin`. `mdt version` reports the release. CI (`.github/workflows/ci.yml`) runs gofmt, `go vet`, `go test`, `golangci-lint`, shellcheck, and a `macos-latest` job that dry-runs every profile plus `upgrade` and `uninstall`.
+Shipped: `.goreleaser.yaml` builds a universal darwin binary on each `v*` tag (`.github/workflows/release.yml`, started by the manual `release-bump.yml` workflow or by a pushed tag), with `checksums.txt` and a Homebrew cask pushed to `JosePBrotons/homebrew-tap`. `install.sh` downloads the latest release, verifies the checksum and installs to `~/.local/bin`. `mdt version` reports the release. CI (`.github/workflows/ci.yml`) runs gofmt, `go vet`, `go test`, `golangci-lint`, shellcheck, and a `macos-latest` job that dry-runs every profile plus `upgrade` and `uninstall`.
 
 Before the first release: create the `JosePBrotons/homebrew-tap` repo and add the `HOMEBREW_TAP_GITHUB_TOKEN` secret (see AGENTS.md, Releasing). The binary is not signed or notarized; the cask clears the quarantine flag, and `install.sh` downloads with curl, which does not set it. Not yet run for real: no release has been cut, and only GoReleaser snapshots and `install.sh` against a local copy were tried.
 
